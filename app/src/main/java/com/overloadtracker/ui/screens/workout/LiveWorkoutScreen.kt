@@ -1,37 +1,38 @@
 /**
  * Active workout screen with expandable exercises, sets, and rest timer.
+ * Refactored with Liquid Glass / Liquid Vitality visual aesthetic.
  */
 package com.overloadtracker.ui.screens.workout
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,17 +42,39 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.overloadtracker.R
+import com.overloadtracker.ui.components.LiquidAlertDialog
+import com.overloadtracker.ui.components.LiquidBottomSheet
+import com.overloadtracker.ui.components.LiquidGlassCard
+import com.overloadtracker.ui.components.LiquidIconButton
+import com.overloadtracker.ui.components.LiquidPrimaryButton
+import com.overloadtracker.ui.components.LiquidSecondaryButton
+import com.overloadtracker.ui.components.LiquidTopAppBar
 import com.overloadtracker.ui.components.RestTimer
 import com.overloadtracker.ui.components.SetRow
 import com.overloadtracker.ui.screens.library.ExerciseLibraryScreen
+import com.overloadtracker.ui.theme.CyanAccent
+import com.overloadtracker.ui.theme.ElectricVioletOnPrimary
+import com.overloadtracker.ui.theme.GlassBorderTopLeft
+import com.overloadtracker.ui.theme.GlassSurfaceHigh
+import com.overloadtracker.ui.theme.LabelCaps
+import com.overloadtracker.ui.theme.MidnightBackground
+import com.overloadtracker.ui.theme.PrimaryGradientBrush
+import com.overloadtracker.ui.theme.ShapeChip
+import com.overloadtracker.ui.theme.ShapePill
+import com.overloadtracker.ui.theme.TextOnSurface
+import com.overloadtracker.ui.theme.TextOnSurfaceVariant
 import com.overloadtracker.util.formatDuration
 
 /**
- * Live workout logging screen.
+ * Live workout logging screen in Liquid Glass style.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,37 +105,31 @@ fun LiveWorkoutScreen(
         onResetRest = viewModel::resetRest
     ) {
         Scaffold(
-            modifier = modifier,
+            modifier = modifier.background(MidnightBackground),
+            containerColor = MidnightBackground,
             topBar = {
-                TopAppBar(
-                    title = {
-                        Column {
-                            Text(uiState.groupName)
-                            Text(
-                                text = formatDuration(uiState.elapsedMillis),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { showDiscardDialog = true }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                        }
-                    },
+                LiquidTopAppBar(
+                    title = uiState.groupName.ifEmpty { "ACTIVE WORKOUT" },
+                    subtitle = formatDuration(uiState.elapsedMillis),
+                    onBackClick = { showDiscardDialog = true },
                     actions = {
-                        TextButton(
+                        LiquidPrimaryButton(
+                            text = stringResource(R.string.finish_workout),
                             onClick = { viewModel.finishWorkout { onFinish() } },
                             enabled = !uiState.isFinishing
-                        ) {
-                            Text(stringResource(R.string.finish_workout))
-                        }
+                        )
                     }
                 )
             },
             snackbarHost = { SnackbarHost(snackbarHostState) },
             floatingActionButton = {
-                FloatingActionButton(onClick = { showAddExercise = true }) {
+                FloatingActionButton(
+                    onClick = { showAddExercise = true },
+                    containerColor = Color.Transparent,
+                    contentColor = ElectricVioletOnPrimary,
+                    shape = ShapePill,
+                    modifier = Modifier.background(PrimaryGradientBrush, shape = ShapePill)
+                ) {
                     Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_exercises))
                 }
             }
@@ -120,9 +137,9 @@ fun LiveWorkoutScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(padding),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+                contentPadding = PaddingValues(16.dp)
             ) {
                 items(uiState.exercises, key = { it.exerciseId }) { exercise ->
                     ExerciseSection(
@@ -148,23 +165,17 @@ fun LiveWorkoutScreen(
     }
 
     if (showDiscardDialog) {
-        AlertDialog(
+        LiquidAlertDialog(
             onDismissRequest = { showDiscardDialog = false },
-            title = { Text(stringResource(R.string.discard_confirm_title)) },
-            text = { Text(stringResource(R.string.discard_confirm_body)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    showDiscardDialog = false
-                    onDiscard()
-                }) {
-                    Text(stringResource(R.string.confirm))
-                }
+            title = stringResource(R.string.discard_confirm_title),
+            bodyText = stringResource(R.string.discard_confirm_body),
+            confirmButtonText = stringResource(R.string.confirm),
+            onConfirm = {
+                showDiscardDialog = false
+                onDiscard()
             },
-            dismissButton = {
-                TextButton(onClick = { showDiscardDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            dismissButtonText = stringResource(R.string.cancel),
+            onDismiss = { showDiscardDialog = false }
         )
     }
 
@@ -190,7 +201,7 @@ private fun AddExerciseBottomSheet(
     onSelect: (com.overloadtracker.data.local.entity.Exercise) -> Unit,
     onViewProgress: (String) -> Unit
 ) {
-    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss) {
+    LiquidBottomSheet(onDismissRequest = onDismiss) {
         ExerciseLibraryScreen(
             onViewProgress = onViewProgress,
             onExerciseSelected = onSelect,
@@ -208,7 +219,7 @@ private fun BoxWithRestTimer(
     onResetRest: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
         content()
         if (restSeconds != null) {
             RestTimer(
@@ -232,52 +243,68 @@ private fun ExerciseSection(
     onCompleteChange: (Int, Boolean) -> Unit,
     onAddSet: () -> Unit
 ) {
-    androidx.compose.material3.Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(exercise.exerciseName, style = MaterialTheme.typography.titleMedium)
-                    exercise.prevBestLabel?.let { label ->
-                        AssistChip(
-                            onClick = {},
-                            label = { Text("Prev: $label") }
+    LiquidGlassCard(
+        modifier = Modifier.fillMaxWidth(),
+        padding = 16.dp
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = exercise.exerciseName,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = TextOnSurface
+                )
+                exercise.prevBestLabel?.let { label ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(ShapeChip)
+                            .background(GlassSurfaceHigh)
+                            .border(width = 1.dp, color = GlassBorderTopLeft, shape = ShapeChip)
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = "PREV: $label".uppercase(),
+                            style = LabelCaps.copy(fontSize = 10.sp),
+                            color = CyanAccent
                         )
                     }
-                }
-                IconButton(onClick = onToggleExpand) {
-                    Icon(
-                        if (exercise.expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = null
-                    )
                 }
             }
-            AnimatedVisibility(visible = exercise.expanded) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    exercise.sets.forEach { set ->
-                        SetRow(
-                            setNumber = set.setNumber,
-                            weightDisplay = set.weightDisplay,
-                            repsDisplay = set.repsDisplay,
-                            rpe = set.rpe,
-                            isCompleted = set.isCompleted,
-                            onWeightChange = { onWeightChange(set.setNumber, it) },
-                            onRepsChange = { onRepsChange(set.setNumber, it) },
-                            onRpeChange = { onRpeChange(set.setNumber, it) },
-                            onCompletedChange = { onCompleteChange(set.setNumber, it) }
-                        )
-                    }
-                    OutlinedButton(
-                        onClick = onAddSet,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 48.dp)
-                    ) {
-                        Text(stringResource(R.string.add_set))
-                    }
+            LiquidIconButton(
+                icon = if (exercise.expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                contentDescription = "Expand/Collapse",
+                onClick = onToggleExpand
+            )
+        }
+        AnimatedVisibility(visible = exercise.expanded) {
+            Column(
+                modifier = Modifier.padding(top = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                exercise.sets.forEach { set ->
+                    SetRow(
+                        setNumber = set.setNumber,
+                        weightDisplay = set.weightDisplay,
+                        repsDisplay = set.repsDisplay,
+                        rpe = set.rpe,
+                        isCompleted = set.isCompleted,
+                        prevWeightDisplay = set.prevWeightDisplay,
+                        onWeightChange = { onWeightChange(set.setNumber, it) },
+                        onRepsChange = { onRepsChange(set.setNumber, it) },
+                        onRpeChange = { onRpeChange(set.setNumber, it) },
+                        onCompletedChange = { onCompleteChange(set.setNumber, it) }
+                    )
                 }
+                Spacer(modifier = Modifier.height(4.dp))
+                LiquidSecondaryButton(
+                    text = stringResource(R.string.add_set),
+                    onClick = onAddSet,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }

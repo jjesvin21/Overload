@@ -1,5 +1,6 @@
 /**
- * Material3 theme with fitness brand colors and [AppThemeMode] support.
+ * Material3 theme configured with Liquid Glass / Liquid Vitality design tokens.
+ * Supports dark and light modes with system preference fallback.
  */
 package com.overloadtracker.ui.theme
 
@@ -17,35 +18,56 @@ import androidx.core.view.WindowCompat
 import com.overloadtracker.data.preferences.AppThemeMode
 
 private val DarkColorScheme = darkColorScheme(
-    primary = OrangeAccent,
-    onPrimary = TextPrimaryLight,
-    primaryContainer = OrangeAccentDark,
-    onPrimaryContainer = TextPrimaryLight,
-    secondary = OrangeAccentLight,
-    onSecondary = TextPrimaryLight,
-    background = NavyDeep,
-    onBackground = TextPrimaryLight,
-    surface = NavySurface,
-    onSurface = TextPrimaryLight,
-    surfaceVariant = NavySurfaceVariant,
-    onSurfaceVariant = TextSecondaryLight,
-    error = ErrorRed
+    primary = ElectricViolet,
+    onPrimary = ElectricVioletOnPrimary,
+    primaryContainer = ElectricVioletContainer,
+    onPrimaryContainer = ElectricVioletOnContainer,
+    inversePrimary = ElectricVioletInverse,
+    secondary = CyanAccent,
+    onSecondary = CyanOnSecondary,
+    secondaryContainer = CyanAccentContainer,
+    onSecondaryContainer = CyanOnContainer,
+    tertiary = SunsetRose,
+    onTertiary = SunsetRoseOnTertiary,
+    tertiaryContainer = SunsetRoseContainer,
+    onTertiaryContainer = SunsetRoseOnContainer,
+    background = MidnightBackground,
+    onBackground = TextOnSurface,
+    surface = MidnightSurface,
+    onSurface = TextOnSurface,
+    surfaceVariant = MidnightSurfaceVariant,
+    onSurfaceVariant = TextOnSurfaceVariant,
+    surfaceTint = ElectricViolet,
+    inverseSurface = TextOnSurface,
+    inverseOnSurface = TextInverseOnSurface,
+    outline = OutlineColor,
+    outlineVariant = OutlineVariantColor,
+    error = ErrorRed,
+    onError = OnError,
+    errorContainer = ErrorContainer,
+    onErrorContainer = OnErrorContainer
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = OrangeAccent,
-    onPrimary = TextPrimaryLight,
-    primaryContainer = OrangeAccentLight,
-    onPrimaryContainer = TextPrimaryDark,
-    secondary = NavyDeep,
-    onSecondary = TextPrimaryLight,
-    background = Color(0xFFF5F7FA),
-    onBackground = TextPrimaryDark,
+    primary = ElectricVioletInverse,
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFE9DDFF),
+    onPrimaryContainer = Color(0xFF23005C),
+    secondary = Color(0xFF00687A),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFACEDFF),
+    onSecondaryContainer = Color(0xFF001F26),
+    tertiary = Color(0xFF92002A),
+    onTertiary = Color.White,
+    background = Color(0xFFF8FAFC),
+    onBackground = Color(0xFF0F172A),
     surface = Color.White,
-    onSurface = TextPrimaryDark,
-    surfaceVariant = Color(0xFFE8EDF2),
-    onSurfaceVariant = TextSecondaryDark,
-    error = ErrorRed
+    onSurface = Color(0xFF0F172A),
+    surfaceVariant = Color(0xFFE2E8F0),
+    onSurfaceVariant = Color(0xFF475569),
+    outline = Color(0xFF94A3B8),
+    outlineVariant = Color(0xFFCBD5E1),
+    error = Color(0xFFBA1A1A)
 )
 
 /**
@@ -76,6 +98,7 @@ fun OverloadTrackerTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = AppTypography,
+        shapes = AppShapes,
         content = content
     )
 }

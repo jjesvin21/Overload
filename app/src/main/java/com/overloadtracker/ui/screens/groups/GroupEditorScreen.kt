@@ -1,32 +1,31 @@
 /**
  * Edit workout group: rename, reorder exercises, remove, and add more.
+ * Refactored with Liquid Glass / Liquid Vitality visual aesthetic.
  */
 package com.overloadtracker.ui.screens.groups
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,7 +35,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -46,7 +47,16 @@ import com.overloadtracker.R
 import com.overloadtracker.data.local.entity.GroupExerciseCrossRef
 import com.overloadtracker.data.local.entity.WorkoutGroup
 import com.overloadtracker.data.repository.WorkoutGroupRepository
+import com.overloadtracker.ui.components.LiquidGlassCard
+import com.overloadtracker.ui.components.LiquidIconButton
+import com.overloadtracker.ui.components.LiquidTextField
+import com.overloadtracker.ui.components.LiquidTopAppBar
 import com.overloadtracker.ui.navigation.GroupEditorRoute
+import com.overloadtracker.ui.theme.ElectricVioletOnPrimary
+import com.overloadtracker.ui.theme.MidnightBackground
+import com.overloadtracker.ui.theme.PrimaryGradientBrush
+import com.overloadtracker.ui.theme.ShapePill
+import com.overloadtracker.ui.theme.TextOnSurface
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -107,7 +117,7 @@ class GroupEditorViewModel @Inject constructor(
 }
 
 /**
- * Screen to rename a group and manage its exercise order.
+ * Screen to rename a group and manage its exercise order in Liquid Glass style.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -137,20 +147,22 @@ fun GroupEditorScreen(
     }
 
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.background(MidnightBackground),
+        containerColor = MidnightBackground,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.edit_group)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
+            LiquidTopAppBar(
+                title = "EDIT ROUTINE",
+                subtitle = "REORDER & CONFIGURE",
+                onBackClick = onBack
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { group?.let { onAddExercises(it.id) } }
+                onClick = { group?.let { onAddExercises(it.id) } },
+                containerColor = Color.Transparent,
+                contentColor = ElectricVioletOnPrimary,
+                shape = ShapePill,
+                modifier = Modifier.background(PrimaryGradientBrush, shape = ShapePill)
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_exercises))
             }
@@ -161,50 +173,63 @@ fun GroupEditorScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            OutlinedTextField(
+            LiquidTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text(stringResource(R.string.group_name)) },
+                label = stringResource(R.string.group_name),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
-            OutlinedTextField(
+            LiquidTextField(
                 value = notes,
                 onValueChange = { notes = it },
-                label = { Text(stringResource(R.string.notes_optional)) },
+                label = stringResource(R.string.notes_optional),
                 modifier = Modifier.fillMaxWidth()
             )
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 itemsIndexed(exercises, key = { _, item -> item.exercise.id }) { index, item ->
-                    Card(modifier = Modifier.fillMaxWidth()) {
+                    LiquidGlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        padding = 12.dp
+                    ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp)
-                                .heightIn(min = 48.dp),
+                            modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 text = item.exercise.name,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = TextOnSurface,
                                 modifier = Modifier.weight(1f)
                             )
-                            IconButton(
+
+                            LiquidIconButton(
+                                icon = Icons.Default.ArrowUpward,
+                                contentDescription = "Move up",
                                 onClick = { viewModel.moveUp(index, exercises) },
                                 enabled = index > 0
-                            ) {
-                                Icon(Icons.Default.ArrowUpward, contentDescription = "Move up")
-                            }
-                            IconButton(
+                            )
+
+                            LiquidIconButton(
+                                icon = Icons.Default.ArrowDownward,
+                                contentDescription = "Move down",
                                 onClick = { viewModel.moveDown(index, exercises) },
                                 enabled = index < exercises.lastIndex
-                            ) {
-                                Icon(Icons.Default.ArrowDownward, contentDescription = "Move down")
-                            }
-                            IconButton(onClick = { viewModel.removeExercise(item.exercise.id) }) {
-                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
-                            }
+                            )
+
+                            LiquidIconButton(
+                                icon = Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.delete),
+                                onClick = { viewModel.removeExercise(item.exercise.id) }
+                            )
                         }
                     }
                 }

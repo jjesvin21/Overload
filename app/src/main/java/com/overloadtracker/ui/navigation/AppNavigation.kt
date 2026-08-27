@@ -1,19 +1,22 @@
 /**
  * Root navigation graph with bottom bar and nested workout flows.
+ * Refactored with Liquid Glass / Liquid Vitality visual aesthetic and smooth transitions.
  */
 package com.overloadtracker.ui.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -25,6 +28,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.overloadtracker.R
+import com.overloadtracker.ui.components.LiquidBottomNavBar
+import com.overloadtracker.ui.components.LiquidNavItem
 import com.overloadtracker.ui.screens.groups.AddExercisesToGroupScreen
 import com.overloadtracker.ui.screens.groups.GroupEditorScreen
 import com.overloadtracker.ui.screens.groups.MyGroupsScreen
@@ -35,9 +40,10 @@ import com.overloadtracker.ui.screens.library.ExerciseLibraryScreen
 import com.overloadtracker.ui.screens.onboarding.OnboardingScreen
 import com.overloadtracker.ui.screens.settings.SettingsScreen
 import com.overloadtracker.ui.screens.workout.LiveWorkoutScreen
+import com.overloadtracker.ui.theme.MidnightBackground
 
 /**
- * Host composable wiring all app destinations and the main bottom navigation bar.
+ * Host composable wiring all app destinations and the main Liquid Glass bottom navigation bar.
  */
 @Composable
 fun AppNavigation(
@@ -54,77 +60,75 @@ fun AppNavigation(
         destination?.hasRoute(HistoryRoute::class) == true ||
         destination?.hasRoute(SettingsRoute::class) == true
 
+    val currentRoute = when {
+        destination?.hasRoute(GroupsRoute::class) == true -> "groups"
+        destination?.hasRoute(LibraryRoute::class) == true -> "library"
+        destination?.hasRoute(HistoryRoute::class) == true -> "history"
+        destination?.hasRoute(SettingsRoute::class) == true -> "settings"
+        else -> null
+    }
+
+    val navItems = listOf(
+        LiquidNavItem(
+            route = "groups",
+            title = stringResource(R.string.nav_groups),
+            icon = Icons.AutoMirrored.Filled.List
+        ),
+        LiquidNavItem(
+            route = "library",
+            title = stringResource(R.string.nav_library),
+            icon = Icons.Default.FitnessCenter
+        ),
+        LiquidNavItem(
+            route = "history",
+            title = stringResource(R.string.nav_history),
+            icon = Icons.Default.History
+        ),
+        LiquidNavItem(
+            route = "settings",
+            title = stringResource(R.string.nav_settings),
+            icon = Icons.Default.Settings
+        )
+    )
+
     val startDestination = if (hasOnboarded) GroupsRoute else OnboardingRoute
 
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.background(MidnightBackground),
+        containerColor = MidnightBackground,
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar {
-                    NavigationBarItem(
-                        selected = destination?.hasRoute(GroupsRoute::class) == true,
-                        onClick = {
-                            navController.navigate(GroupsRoute) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
+                LiquidBottomNavBar(
+                    items = navItems,
+                    currentRoute = currentRoute,
+                    onItemSelected = { item ->
+                        val targetRoute = when (item.route) {
+                            "groups" -> GroupsRoute
+                            "library" -> LibraryRoute
+                            "history" -> HistoryRoute
+                            "settings" -> SettingsRoute
+                            else -> GroupsRoute
+                        }
+                        navController.navigate(targetRoute) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
                             }
-                        },
-                        icon = { Icon(Icons.Default.List, contentDescription = null) },
-                        label = { Text(stringResource(R.string.nav_groups)) }
-                    )
-                    NavigationBarItem(
-                        selected = destination?.hasRoute(LibraryRoute::class) == true,
-                        onClick = {
-                            navController.navigate(LibraryRoute) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(Icons.Default.FitnessCenter, contentDescription = null) },
-                        label = { Text(stringResource(R.string.nav_library)) }
-                    )
-                    NavigationBarItem(
-                        selected = destination?.hasRoute(HistoryRoute::class) == true,
-                        onClick = {
-                            navController.navigate(HistoryRoute) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(Icons.Default.History, contentDescription = null) },
-                        label = { Text(stringResource(R.string.nav_history)) }
-                    )
-                    NavigationBarItem(
-                        selected = destination?.hasRoute(SettingsRoute::class) == true,
-                        onClick = {
-                            navController.navigate(SettingsRoute) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                        label = { Text(stringResource(R.string.nav_settings)) }
-                    )
-                }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
         }
     ) { padding ->
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier.padding(padding),
+            enterTransition = { fadeIn(animationSpec = tween(300)) },
+            exitTransition = { fadeOut(animationSpec = tween(300)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+            popExitTransition = { fadeOut(animationSpec = tween(300)) }
         ) {
             composable<OnboardingRoute> {
                 OnboardingScreen(onComplete = {
@@ -175,7 +179,11 @@ fun AppNavigation(
                     onAdded = { navController.popBackStack() }
                 )
             }
-            composable<LiveWorkoutRoute> {
+            composable<LiveWorkoutRoute>(
+                enterTransition = { slideInVertically(initialOffsetY = { it }, animationSpec = tween(350)) + fadeIn() },
+                exitTransition = { slideOutVertically(targetOffsetY = { it }, animationSpec = tween(350)) + fadeOut() },
+                popExitTransition = { slideOutVertically(targetOffsetY = { it }, animationSpec = tween(350)) + fadeOut() }
+            ) {
                 LiveWorkoutScreen(
                     onFinish = {
                         navController.popBackStack<LiveWorkoutRoute>(inclusive = true)

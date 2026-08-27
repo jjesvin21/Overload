@@ -1,0 +1,357 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Exercise Library - Overload</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-tint": "#ffb59f",
+                "primary-container": "#ff571b",
+                "on-primary-fixed": "#3a0a00",
+                "on-primary-fixed-variant": "#852400",
+                "secondary-container": "#454747",
+                "success-green": "#2DCC71",
+                "primary-fixed": "#ffdbd0",
+                "charcoal": "#121212",
+                "surface": "#131313",
+                "outline": "#ac897e",
+                "secondary": "#c6c6c7",
+                "on-secondary-fixed": "#1a1c1c",
+                "surface-bright": "#393939",
+                "strava-orange": "#FC4C02",
+                "surface-variant": "#353534",
+                "background": "#131313",
+                "on-tertiary-fixed-variant": "#474746",
+                "surface-dim": "#131313",
+                "tertiary": "#c8c6c5",
+                "tertiary-container": "#929090",
+                "surface-container": "#201f1f",
+                "secondary-fixed": "#e2e2e2",
+                "on-tertiary-container": "#2a2a2a",
+                "on-surface-variant": "#e6beb2",
+                "on-error": "#690005",
+                "tertiary-fixed": "#e5e2e1",
+                "inverse-on-surface": "#313030",
+                "on-background": "#e5e2e1",
+                "surface-container-highest": "#353534",
+                "on-secondary-container": "#b4b5b5",
+                "pr-gold": "#D4AF37",
+                "on-secondary-fixed-variant": "#454747",
+                "on-secondary": "#2f3131",
+                "on-surface": "#e5e2e1",
+                "error": "#ffb4ab",
+                "true-black": "#000000",
+                "inverse-surface": "#e5e2e1",
+                "surface-gray": "#1E1E1E",
+                "on-primary": "#5e1700",
+                "secondary-fixed-dim": "#c6c6c7",
+                "on-tertiary": "#303030",
+                "primary": "#ffb59f",
+                "tertiary-fixed-dim": "#c8c6c5",
+                "on-tertiary-fixed": "#1b1b1c",
+                "primary-fixed-dim": "#ffb59f",
+                "on-primary-container": "#531300",
+                "on-error-container": "#ffdad6",
+                "error-container": "#93000a",
+                "surface-container-high": "#2a2a2a",
+                "surface-container-lowest": "#0e0e0e",
+                "surface-container-low": "#1c1b1b",
+                "outline-variant": "#5c4038",
+                "inverse-primary": "#ae3100"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "stack-sm": "0.5rem",
+                "gutter": "1rem",
+                "stack-md": "1rem",
+                "glass-blur": "24px",
+                "margin-page": "1.5rem",
+                "stack-lg": "2rem",
+                "element-gap": "1rem",
+                "inner-padding-lg": "1.5rem",
+                "inner-padding-sm": "1rem",
+                "section-margin": "2rem",
+                "container-padding": "1.5rem"
+        },
+        "fontFamily": {
+                "body-lg": [
+                        "Inter"
+                ],
+                "headline-lg": [
+                        "Inter"
+                ],
+                "headline-lg-mobile": [
+                        "Inter"
+                ],
+                "display-metrics": [
+                        "Inter"
+                ],
+                "numeric-data": [
+                        "Inter"
+                ],
+                "body-md": [
+                        "Inter"
+                ],
+                "headline-md": [
+                        "Inter"
+                ],
+                "label-caps": [
+                        "JetBrains Mono"
+                ]
+        },
+        "fontSize": {
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "28px",
+                        {
+                                "lineHeight": "34px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "display-metrics": [
+                        "48px",
+                        {
+                                "lineHeight": "52px",
+                                "letterSpacing": "-0.04em",
+                                "fontWeight": "800"
+                        }
+                ],
+                "numeric-data": [
+                        "20px",
+                        {
+                                "lineHeight": "24px",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "label-caps": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.1em",
+                                "fontWeight": "600"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        /* Hide scrollbar for filter chips */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-true-black text-on-background min-h-screen overflow-x-hidden font-body-lg pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-true-black/80 backdrop-blur-md border-b border-white/5 shadow-none">
+<div class="flex items-center gap-4">
+<img alt="User profile photo" class="w-8 h-8 rounded-full object-cover border border-white/10" data-alt="A small, stylized circular profile picture of an athlete with dramatic lighting in a dark, moody high-end gym setting. Neon violet highlights catch the edge of their face." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsgEnndCOivRlHUJCkkSQI4vdJn2uan9lxFBa__liAYNSuRl5IhXZWMt93zA8Bj8xth9A35Mn9EjK3_Y681qhaN-X7o1eWaeKz4XHkf5dqsRFvUU7Qht40yA2vy_ZChdJFH0_J2wJ-nXv3GUqIMwcn6a1V9IGiZVsVDpIdAExfmipUIetB0AgL3bls_GgWG06DdvyyvZPdZdfBM_B8cvjYTc-huRaksLdleSMh-bXitvzy2kHUjZbIuw">
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-strava-orange">Overload</h1>
+<div class="flex items-center">
+<button class="hover:opacity-80 transition-opacity flex items-center justify-center p-2 rounded-full hover:bg-white/5 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-strava-orange" style="font-variation-settings: 'FILL' 0;">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 px-container-padding max-w-7xl mx-auto">
+<!-- Search Bar Area -->
+<section class="mb-section-margin">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-gray border border-white/10 rounded-xl py-3 pl-12 pr-4 text-on-background placeholder:text-on-surface-variant/70 focus:outline-none focus:ring-1 focus:ring-strava-orange/50 transition-all font-body-md text-body-md" placeholder="Search exercises..." type="text">
+</div>
+</section>
+<!-- Filter Chips (Horizontal Scroll) -->
+<section class="mb-section-margin -mx-container-padding px-container-padding">
+<div class="flex overflow-x-auto gap-3 no-scrollbar pb-2">
+<button class="whitespace-nowrap px-4 py-2 rounded-full font-label-caps text-label-caps bg-strava-orange text-white transition-all shadow-[0_0_15px_rgba(252,76,2,0.3)]">All</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full font-label-caps text-label-caps bg-charcoal border border-white/10 text-on-surface-variant hover:text-on-background transition-all">Chest</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full font-label-caps text-label-caps bg-charcoal border border-white/10 text-on-surface-variant hover:text-on-background transition-all">Back</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full font-label-caps text-label-caps bg-charcoal border border-white/10 text-on-surface-variant hover:text-on-background transition-all">Legs</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full font-label-caps text-label-caps bg-charcoal border border-white/10 text-on-surface-variant hover:text-on-background transition-all">Shoulders</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full font-label-caps text-label-caps bg-charcoal border border-white/10 text-on-surface-variant hover:text-on-background transition-all">Arms</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full font-label-caps text-label-caps bg-charcoal border border-white/10 text-on-surface-variant hover:text-on-background transition-all">Core</button>
+</div>
+</section>
+<!-- Exercise Grid -->
+<section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+<!-- Card 1 -->
+<div class="bg-charcoal border border-white/5 rounded-xl overflow-hidden flex flex-col group cursor-pointer hover:shadow-[0_0_20px_rgba(252,76,2,0.15)] transition-all duration-300">
+<div class="relative aspect-square w-full bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Close up action shot of heavy incline dumbbell chest press being performed. High contrast lighting, sweat glistening, dark cinematic gym atmosphere, cyan and violet rim lights." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMGReCl1d-QMW54UCARQXLH1h8v9V7zfH-YXZkwoWKi3MqzAtWgi25I3VeLdmNo96e4yRJVnGOwzAxEEe8LBAbKlaF24Q3wmpP0Mx9rJK6jaVoqWGZd9ZnCeo4sbznv6oRCWIcmfoOp6X29gDStW35wtYsfj_hH94Yb1WwO5-DNanQV2H02Q8Dl-JxF2E6lEWrazpPnkYLwaZT9yXt_eoud3q3nTWDEnpH3QmS7sXH0oAiJnYCYTDmFg">
+<div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent"></div>
+<div class="absolute bottom-2 left-2 flex gap-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-bright/80 font-label-caps text-label-caps text-strava-orange text-[10px]">Chest</span>
+</div>
+</div>
+<div class="p-3 flex flex-col gap-1 flex-grow">
+<h3 class="font-body-md text-body-md font-semibold text-on-background leading-tight">Incline Dumbbell Press</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant/70 mt-auto flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">fitness_center</span> Dumbbells
+                    </p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-charcoal border border-white/5 rounded-xl overflow-hidden flex flex-col group cursor-pointer hover:shadow-[0_0_20px_rgba(252,76,2,0.15)] transition-all duration-300">
+<div class="relative aspect-square w-full bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Muscular back flexing during a pull-up or lat pulldown. Moody dark environment with dramatic neon purple lighting illuminating the muscle definition." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6IvGYYleWkfNQCSDr7DpTC-QC22kSxv25rEMqNinp6XFT_BT1SkCUvQczrOeqHVmCDRA2_ZcjybqHfg4_HwzJH4DJKJL9q77hhqjyJxPIyk_QLA4LZ3ToS29kv5uYAWfPJgvU8dsOuzTbHyetOFqbjw5mcgP_I4l4hKPP5Ob7gspfGrEoO8ylbeesB_5lIO-8WM24I2udL0cWvigWRNwoJ_qLTKu4G7rhqPEVw2ryXo_Dxe0Aj6830w">
+<div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent"></div>
+<div class="absolute bottom-2 left-2 flex gap-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-bright/80 font-label-caps text-label-caps text-strava-orange text-[10px]">Back</span>
+</div>
+</div>
+<div class="p-3 flex flex-col gap-1 flex-grow">
+<h3 class="font-body-md text-body-md font-semibold text-on-background leading-tight">Lat Pulldown</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant/70 mt-auto flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">settings_input_component</span> Cable
+                    </p>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-charcoal border border-white/5 rounded-xl overflow-hidden flex flex-col group cursor-pointer hover:shadow-[0_0_20px_rgba(252,76,2,0.15)] transition-all duration-300">
+<div class="relative aspect-square w-full bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Barbell back squat setup. Close up on the loaded barbell resting on traps. High tech dark aesthetic gym setting with subtle blue glows in the background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuARIxUTPM8iTFocP64b_kZv4XCKIr5TkRW5zRD1j6DMIkqcuFHDl36XQii3MkpuC7OIKaTCD-PAAFYCzacgxO08h6rQs9D6szEMNfou0shKhAWWH75p3J2vAH_Udlo4_Rdb_2gLybS1gYdXmO-PpcWlkBQIkP-Ba_0Jl0ljYpTEkxpKLCrQgJyqpiYKtMeJgWuS2DDzg-lRUS3MY380tCg2PhviFsuuEJIGiUMljyVr8XDe7XBMwGZ-7A">
+<div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent"></div>
+<div class="absolute bottom-2 left-2 flex gap-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-bright/80 font-label-caps text-label-caps text-strava-orange text-[10px]">Legs</span>
+</div>
+</div>
+<div class="p-3 flex flex-col gap-1 flex-grow">
+<h3 class="font-body-md text-body-md font-semibold text-on-background leading-tight">Barbell Squat</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant/70 mt-auto flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">fitness_center</span> Barbell
+                    </p>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-charcoal border border-white/5 rounded-xl overflow-hidden flex flex-col group cursor-pointer hover:shadow-[0_0_20px_rgba(252,76,2,0.15)] transition-all duration-300">
+<div class="relative aspect-square w-full bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Close up of hands gripping dumbbells during lateral raises. Focus on shoulder deltoid striations. Dark, moody, high-end fitness center aesthetic with magenta rim light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPfB9sDQ9mdmi1JREEnf0DSp68w0FapJ7LxaeVVbGxDkoXbREKLQm8JzdaXDeiWVCZ3JKvw0Gqq-hqMjgWKMGclwBU9SnAriVUMmZPZpp7VdqupsiHPtXdumzIjkONW1ET5sUxxDuGS4wLnzhtx_pps5szmM-Vw-CJGs976FtI3F4lkre7NasRGDJCYT-uLB4pBGspzIm7oktHfyXHBEech_nl6OXri_7wEvbFbqxBe-o3wzLxMf2JRw">
+<div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent"></div>
+<div class="absolute bottom-2 left-2 flex gap-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-bright/80 font-label-caps text-label-caps text-strava-orange text-[10px]">Shoulders</span>
+</div>
+</div>
+<div class="p-3 flex flex-col gap-1 flex-grow">
+<h3 class="font-body-md text-body-md font-semibold text-on-background leading-tight">Lateral Raises</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant/70 mt-auto flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">fitness_center</span> Dumbbells
+                    </p>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="bg-charcoal border border-white/5 rounded-xl overflow-hidden flex flex-col group cursor-pointer hover:shadow-[0_0_20px_rgba(252,76,2,0.15)] transition-all duration-300">
+<div class="relative aspect-square w-full bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Strained face and arm during a heavy bicep curl. Liquid glass visual theme, dark shadows, stark contrast, intense athletic effort." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEzM-N_C80vT4aVZZqtf1R8ERP2gZqJ1hI0uhnJOohJDCV5T8HdfNGGd5qyiChVioJdRn-34X-uHYXtMoJnjMb02Deqmp-t6csYIG2d-LGHtrMM7hEvxAoNFhXkSqCN_acufUqYKNn9KfCyAg0E3KIgjvbZUBafqwUil-Ofir_yTLGMY8KVNN7xAG9tVYWnWoomlX_QxVKr6PvPy_HEoYgEnr-JAQlafTkivStVBuuEzzlj7AGfgkPrQ">
+<div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent"></div>
+<div class="absolute bottom-2 left-2 flex gap-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-bright/80 font-label-caps text-label-caps text-strava-orange text-[10px]">Arms</span>
+</div>
+</div>
+<div class="p-3 flex flex-col gap-1 flex-grow">
+<h3 class="font-body-md text-body-md font-semibold text-on-background leading-tight">Hammer Curls</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant/70 mt-auto flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">fitness_center</span> Dumbbells
+                    </p>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="bg-charcoal border border-white/5 rounded-xl overflow-hidden flex flex-col group cursor-pointer hover:shadow-[0_0_20px_rgba(252,76,2,0.15)] transition-all duration-300">
+<div class="relative aspect-square w-full bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Person performing a plank or ab rollout. Low angle shot, dark environment, slick modern gym floor, glowing edge lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJcuGxvZ0q_2d0Z17-1RaxyeEUQCRdc2GRenpdBGsx8Os8LBHiHXNnP6kwJKlKgU6vQ2IU4SCrBFAtE2_5rU60gUJj6PTFIYA5Vz7dZ76KzT1yWV4l13jP2JDk1-Qllt8ryoaIT7OB0MiGCh6FlMFhuLTGsTUyeLSOQSNOWCzKHNXV32UMl0I5j5eYClGvQQrJ13VhI-wPc8IlpyixzcRfS1TeMEYT-YUwS95iB0_VLFcI5kSMqx4WLg">
+<div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 to-transparent"></div>
+<div class="absolute bottom-2 left-2 flex gap-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-bright/80 font-label-caps text-label-caps text-strava-orange text-[10px]">Core</span>
+</div>
+</div>
+<div class="p-3 flex flex-col gap-1 flex-grow">
+<h3 class="font-body-md text-body-md font-semibold text-on-background leading-tight">Cable Crunch</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant/70 mt-auto flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">settings_input_component</span> Cable
+                    </p>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 flex justify-around items-center py-3 px-2 bg-charcoal/90 backdrop-blur-md rounded-full border border-white/10 shadow-[0_0_20px_rgba(252,76,2,0.15)]">
+<button class="flex flex-col items-center justify-center text-strava-orange bg-strava-orange/10 rounded-full px-4 py-1 active:scale-90 transition-all duration-300 ease-out font-label-caps text-label-caps">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+<span class="mt-1">Library</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-strava-orange/80 transition-opacity font-label-caps text-label-caps">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">timer</span>
+<span class="mt-1">Workouts</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-strava-orange/80 transition-opacity font-label-caps text-label-caps">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">history</span>
+<span class="mt-1">History</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-strava-orange/80 transition-opacity font-label-caps text-label-caps">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">insights</span>
+<span class="mt-1">Settings</span>
+</button>
+</nav>
+
+
+</body></html>
