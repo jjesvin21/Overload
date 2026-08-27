@@ -1,0 +1,383 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Progressive Overload Tracker</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-tint": "#ffb59f",
+                "primary-container": "#ff571b",
+                "on-primary-fixed": "#3a0a00",
+                "on-primary-fixed-variant": "#852400",
+                "secondary-container": "#454747",
+                "success-green": "#2DCC71",
+                "primary-fixed": "#ffdbd0",
+                "charcoal": "#121212",
+                "surface": "#131313",
+                "outline": "#ac897e",
+                "secondary": "#c6c6c7",
+                "on-secondary-fixed": "#1a1c1c",
+                "surface-bright": "#393939",
+                "strava-orange": "#FC4C02",
+                "surface-variant": "#353534",
+                "background": "#131313",
+                "on-tertiary-fixed-variant": "#474746",
+                "surface-dim": "#131313",
+                "tertiary": "#c8c6c5",
+                "tertiary-container": "#929090",
+                "surface-container": "#201f1f",
+                "secondary-fixed": "#e2e2e2",
+                "on-tertiary-container": "#2a2a2a",
+                "on-surface-variant": "#e6beb2",
+                "on-error": "#690005",
+                "tertiary-fixed": "#e5e2e1",
+                "inverse-on-surface": "#313030",
+                "on-background": "#e5e2e1",
+                "surface-container-highest": "#353534",
+                "on-secondary-container": "#b4b5b5",
+                "pr-gold": "#D4AF37",
+                "on-secondary-fixed-variant": "#454747",
+                "on-secondary": "#2f3131",
+                "on-surface": "#e5e2e1",
+                "error": "#ffb4ab",
+                "true-black": "#000000",
+                "inverse-surface": "#e5e2e1",
+                "surface-gray": "#1E1E1E",
+                "on-primary": "#5e1700",
+                "secondary-fixed-dim": "#c6c6c7",
+                "on-tertiary": "#303030",
+                "primary": "#ffb59f",
+                "tertiary-fixed-dim": "#c8c6c5",
+                "on-tertiary-fixed": "#1b1b1c",
+                "primary-fixed-dim": "#ffb59f",
+                "on-primary-container": "#531300",
+                "on-error-container": "#ffdad6",
+                "error-container": "#93000a",
+                "surface-container-high": "#2a2a2a",
+                "surface-container-lowest": "#0e0e0e",
+                "surface-container-low": "#1c1b1b",
+                "outline-variant": "#5c4038",
+                "inverse-primary": "#ae3100"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "section-margin": "2rem",
+                "element-gap": "1rem",
+                "inner-padding-sm": "1rem",
+                "glass-blur": "24px",
+                "inner-padding-lg": "1.5rem",
+                "container-padding": "1.5rem",
+                "margin-page": "1.5rem",
+                "stack-sm": "0.5rem",
+                "gutter": "1rem",
+                "stack-md": "1rem",
+                "stack-lg": "2rem"
+        },
+        "fontFamily": {
+                "body-lg": [
+                        "Inter"
+                ],
+                "headline-lg": [
+                        "Inter"
+                ],
+                "headline-lg-mobile": [
+                        "Inter"
+                ],
+                "display-metrics": [
+                        "Inter"
+                ],
+                "numeric-data": [
+                        "Inter"
+                ],
+                "body-md": [
+                        "Inter"
+                ],
+                "headline-md": [
+                        "Inter"
+                ],
+                "label-caps": [
+                        "JetBrains Mono"
+                ]
+        },
+        "fontSize": {
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "28px",
+                        {
+                                "lineHeight": "34px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "display-metrics": [
+                        "48px",
+                        {
+                                "lineHeight": "52px",
+                                "letterSpacing": "-0.04em",
+                                "fontWeight": "800"
+                        }
+                ],
+                "numeric-data": [
+                        "20px",
+                        {
+                                "lineHeight": "24px",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "label-caps": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.1em",
+                                "fontWeight": "600"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background-color: rgba(19, 19, 19, 0.5); /* Surface */
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        /* Atmospheric Animation */
+        @keyframes blob-float {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob-float 15s infinite alternate ease-in-out;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+    </style>
+</head>
+<body class="bg-true-black text-on-background min-h-screen relative overflow-x-hidden selection:bg-strava-orange/30 pb-32">
+<!-- Atmospheric Background (Level 0) -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+<div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-strava-orange/10 blur-[100px] animate-blob mix-blend-screen"></div>
+<div class="absolute bottom-[20%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-secondary-fixed/5 blur-[120px] animate-blob animation-delay-2000 mix-blend-screen"></div>
+</div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-true-black/60 dark:bg-true-black/60 backdrop-blur-glass border-b border-on-background/10 shadow-none transition-transform md:hidden">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-on-background/20">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A highly detailed portrait of a fit, athletic user with short dark hair, shot in moody, high-contrast studio lighting with subtle purple and blue neon edge lights reflecting the app's aesthetic. Deep obsidian background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmQGKM0k0uK5mq7nRDNpVAEsn1KHJ9MnSGjNXQCFdOTcj968kNykTamycKY8YTFrIejBoyzsvGwbueh_5fh-9hv-2pXdhZrPVyd77XseNgvaPiS-2mzhKda9A_vEVkI3Ep8pLmFPyVnLivGsTXTjZorXJHhzZfP7Jx9hV_DS7M0HekVnhHpbhrxdhFt-qu8FCKecw71gGl4h4lbrpxhjCajhjKGP_BogWpIrVCciX78zK31sW_anU-oQ">
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-strava-orange">Overload</h1>
+</div>
+<button class="text-on-background/70 hover:text-strava-orange transition-opacity active:scale-95 transition-transform flex items-center justify-center w-10 h-10 rounded-full bg-on-background/5">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="relative z-10 pt-24 px-container-padding flex flex-col gap-section-margin md:max-w-2xl md:mx-auto">
+<!-- Welcome & Quick Start (Level 1 to 2) -->
+<section class="flex flex-col gap-element-gap">
+<div class="flex flex-col">
+<p class="font-body-md text-body-md text-on-surface-variant">Ready to crush it?</p>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Today's Focus</h2>
+</div>
+<div class="glass-panel rounded-xl p-inner-padding-lg flex flex-col items-center text-center gap-6 relative overflow-hidden">
+<!-- Subtle internal decorative element -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-strava-orange/10 rounded-full blur-[40px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+<div class="flex flex-col items-center gap-2 z-10">
+<span class="font-label-caps text-label-caps text-strava-orange uppercase tracking-widest px-3 py-1 bg-strava-orange/10 rounded-full border border-strava-orange/20">Up Next</span>
+<h3 class="font-display-metrics text-display-metrics text-on-surface">Push A</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Heavy compound movements.</p>
+</div>
+<button class="w-full relative group overflow-hidden rounded-full p-[1px] z-10">
+<div class="absolute inset-0 bg-strava-orange opacity-70 group-hover:opacity-100 transition-opacity duration-300"></div>
+<div class="relative bg-surface rounded-full px-6 py-4 flex items-center justify-center gap-2 group-hover:bg-opacity-0 transition-all duration-300">
+<span class="material-symbols-outlined filled text-strava-orange group-hover:text-true-black">play_arrow</span>
+<span class="font-headline-md text-headline-md text-on-surface group-hover:text-true-black transition-colors">Start Workout</span>
+</div>
+</button>
+</div>
+</section>
+<!-- Weekly Progress (Level 1) -->
+<section class="flex flex-col gap-element-gap">
+<div class="flex justify-between items-end">
+<h2 class="font-headline-md text-headline-md text-on-surface">Weekly Progress</h2>
+<span class="font-label-caps text-label-caps text-strava-orange">Vol: 12.4k kg</span>
+</div>
+<div class="glass-panel rounded-xl p-inner-padding-lg flex flex-col gap-4">
+<div class="flex justify-between items-end h-32 gap-2">
+<!-- Liquid Bar Charts -->
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full bg-surface-container-highest rounded-full h-full relative overflow-hidden flex items-end">
+<div class="w-full bg-gradient-to-t from-strava-orange/40 to-strava-orange rounded-full transition-all duration-500 ease-out group-hover:opacity-80" style="height: 40%"></div>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">M</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full bg-surface-container-highest rounded-full h-full relative overflow-hidden flex items-end">
+<div class="w-full bg-gradient-to-t from-strava-orange/40 to-strava-orange rounded-full transition-all duration-500 ease-out group-hover:opacity-80" style="height: 65%"></div>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">T</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full bg-surface-container-highest rounded-full h-full relative overflow-hidden flex items-end">
+<div class="w-full bg-gradient-to-t from-secondary/40 to-secondary rounded-full transition-all duration-500 ease-out group-hover:opacity-80" style="height: 20%"></div>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">W</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full bg-surface-container-highest rounded-full h-full relative overflow-hidden flex items-end">
+<div class="w-full bg-gradient-to-t from-strava-orange/40 to-strava-orange rounded-full transition-all duration-500 ease-out group-hover:opacity-80 shadow-[0_0_15px_rgba(252,76,2,0.4)]" style="height: 85%"></div>
+</div>
+<span class="font-label-caps text-label-caps text-strava-orange">T</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full bg-surface-container-highest rounded-full h-full relative overflow-hidden flex items-end">
+<div class="w-full bg-gradient-to-t from-strava-orange/20 to-strava-orange/40 rounded-full transition-all duration-500 ease-out" style="height: 0%"></div>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant/50">F</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full bg-surface-container-highest rounded-full h-full relative overflow-hidden flex items-end">
+<div class="w-full bg-gradient-to-t from-strava-orange/20 to-strava-orange/40 rounded-full transition-all duration-500 ease-out" style="height: 0%"></div>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant/50">S</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full bg-surface-container-highest rounded-full h-full relative overflow-hidden flex items-end">
+<div class="w-full bg-gradient-to-t from-strava-orange/20 to-strava-orange/40 rounded-full transition-all duration-500 ease-out" style="height: 0%"></div>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant/50">S</span>
+</div>
+</div>
+</div>
+</section>
+<!-- My Groups / Bento Grid (Level 1) -->
+<section class="flex flex-col gap-element-gap">
+<div class="flex justify-between items-center">
+<h2 class="font-headline-md text-headline-md text-on-surface">My Groups</h2>
+<button class="text-on-surface-variant font-label-caps text-label-caps flex items-center gap-1 hover:text-strava-orange transition-colors">
+                    See All <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Large Card -->
+<div class="bg-charcoal col-span-2 rounded-xl p-inner-padding-sm flex justify-between items-center active:scale-[0.98] transition-transform cursor-pointer group border border-on-background/10 hover:border-strava-orange/30">
+<div class="flex flex-col gap-1 z-10">
+<h3 class="font-numeric-data text-numeric-data text-on-surface">Push A</h3>
+<p class="font-label-caps text-label-caps text-strava-orange">6 Exercises <span class="text-on-surface-variant">• 45 Min</span></p>
+</div>
+<div class="w-12 h-12 rounded-full bg-surface-container-highest border border-on-background/10 flex items-center justify-center text-strava-orange group-hover:bg-strava-orange/20 transition-colors">
+<span class="material-symbols-outlined">fitness_center</span>
+</div>
+</div>
+<!-- Small Card 1 -->
+<div class="bg-charcoal rounded-xl p-inner-padding-sm flex flex-col justify-between aspect-square active:scale-[0.98] transition-transform cursor-pointer group relative overflow-hidden border border-on-background/10 hover:border-strava-orange/30">
+<div class="absolute inset-0 bg-gradient-to-br from-strava-orange/5 to-transparent pointer-events-none"></div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-on-background/10 flex items-center justify-center text-strava-orange mb-2 group-hover:bg-strava-orange/20 transition-colors">
+<span class="material-symbols-outlined">airline_seat_legroom_extra</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-body-lg text-body-lg text-on-surface font-semibold">Leg Day</h3>
+<p class="font-label-caps text-label-caps text-strava-orange">Last: 2d ago</p>
+</div>
+</div>
+<!-- Small Card 2 -->
+<div class="bg-charcoal rounded-xl p-inner-padding-sm flex flex-col justify-between aspect-square active:scale-[0.98] transition-transform cursor-pointer group relative overflow-hidden border border-on-background/10 hover:border-strava-orange/30">
+<div class="absolute inset-0 bg-gradient-to-br from-strava-orange/5 to-transparent pointer-events-none"></div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-on-background/10 flex items-center justify-center text-strava-orange mb-2 group-hover:bg-strava-orange/20 transition-colors">
+<span class="material-symbols-outlined">bolt</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-body-lg text-body-lg text-on-surface font-semibold">Upper Power</h3>
+<p class="font-label-caps text-label-caps text-strava-orange">5 Exercises</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 flex justify-around items-center py-3 px-2 bg-surface/80 dark:bg-surface/80 backdrop-blur-glass border border-on-background/12 shadow-[0_0_20px_rgba(252,76,2,0.1)] rounded-full md:hidden">
+<!-- Inactive Tab: Library -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-strava-orange/80 group">
+<span class="material-symbols-outlined group-hover:-translate-y-1 transition-transform">fitness_center</span>
+<span class="font-label-caps text-label-caps mt-1">Library</span>
+</button>
+<!-- Active Tab: Workouts -->
+<button class="flex flex-col items-center justify-center text-strava-orange bg-strava-orange/10 rounded-full px-4 py-1 active:scale-90 transition-all duration-300 ease-out">
+<span class="material-symbols-outlined filled">timer</span>
+<span class="font-label-caps text-label-caps mt-1">Workouts</span>
+</button>
+<!-- Inactive Tab: History -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-strava-orange/80 group">
+<span class="material-symbols-outlined group-hover:-translate-y-1 transition-transform">history</span>
+<span class="font-label-caps text-label-caps mt-1">History</span>
+</button>
+<!-- Inactive Tab: Progress -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-strava-orange/80 group">
+<span class="material-symbols-outlined group-hover:-translate-y-1 transition-transform">insights</span>
+<span class="font-label-caps text-label-caps mt-1">Settings<br></span>
+</button>
+</nav>
+
+
+</body></html>

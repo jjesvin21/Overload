@@ -1,15 +1,19 @@
 /**
  * Workout groups list with create, swipe-delete, and quick actions.
+ * Refactored with Liquid Glass design system aesthetic.
  */
 package com.overloadtracker.ui.screens.groups
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,21 +22,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,12 +43,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.overloadtracker.R
-import com.overloadtracker.data.local.entity.WorkoutGroup
-import com.overloadtracker.util.formatDuration
+import com.overloadtracker.ui.components.LiquidAlertDialog
+import com.overloadtracker.ui.components.LiquidGlassCard
+import com.overloadtracker.ui.components.LiquidIconButton
+import com.overloadtracker.ui.components.LiquidTextField
+import com.overloadtracker.ui.components.LiquidTopAppBar
+import com.overloadtracker.ui.theme.CyanAccent
+import com.overloadtracker.ui.theme.ElectricViolet
+import com.overloadtracker.ui.theme.ElectricVioletOnPrimary
+import com.overloadtracker.ui.theme.ErrorRed
+import com.overloadtracker.ui.theme.LabelCaps
+import com.overloadtracker.ui.theme.MidnightBackground
+import com.overloadtracker.ui.theme.PrimaryGradientBrush
+import com.overloadtracker.ui.theme.ShapePill
+import com.overloadtracker.ui.theme.TextOnSurface
+import com.overloadtracker.ui.theme.TextOnSurfaceVariant
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -86,9 +102,22 @@ fun MyGroupsScreen(
     }
 
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.background(MidnightBackground),
+        containerColor = MidnightBackground,
+        topBar = {
+            LiquidTopAppBar(
+                title = "MY WORKOUTS",
+                subtitle = "APEX ROUTINES & GROUPS"
+            )
+        },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showCreateDialog = true }) {
+            FloatingActionButton(
+                onClick = { showCreateDialog = true },
+                containerColor = Color.Transparent,
+                contentColor = ElectricVioletOnPrimary,
+                shape = ShapePill,
+                modifier = Modifier.background(PrimaryGradientBrush, shape = ShapePill)
+            ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.create_group))
             }
         },
@@ -104,7 +133,7 @@ fun MyGroupsScreen(
                 Text(
                     text = stringResource(R.string.empty_groups),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = TextOnSurfaceVariant
                 )
             }
         } else {
@@ -112,8 +141,8 @@ fun MyGroupsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(16.dp)
             ) {
                 items(groups, key = { it.group.id }) { item ->
                     GroupSwipeCard(
@@ -160,52 +189,54 @@ private fun GroupSwipeCard(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 20.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Icon(
                     Icons.Default.Delete,
                     contentDescription = stringResource(R.string.delete),
-                    tint = MaterialTheme.colorScheme.error
+                    tint = ErrorRed
                 )
             }
         },
         enableDismissFromStartToEnd = false
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onStart)
+        LiquidGlassCard(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onStart,
+            padding = 16.dp
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .heightIn(min = 48.dp),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = item.group.name,
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = TextOnSurface
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "${item.exerciseCount} exercises",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "${item.exerciseCount} EXERCISES",
+                        style = LabelCaps.copy(fontSize = 11.sp),
+                        color = TextOnSurfaceVariant
                     )
                     item.lastPerformed?.let { ts ->
                         val fmt = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "Last: ${fmt.format(Date(ts))}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            text = "LAST: ${fmt.format(Date(ts))}".uppercase(),
+                            style = LabelCaps.copy(fontSize = 11.sp),
+                            color = CyanAccent
                         )
                     }
                 }
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_group))
-                }
+                LiquidIconButton(
+                    icon = Icons.Default.Edit,
+                    contentDescription = stringResource(R.string.edit_group),
+                    onClick = onEdit
+                )
             }
         }
     }
@@ -218,38 +249,33 @@ private fun CreateGroupDialog(
 ) {
     var name by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
-    AlertDialog(
+
+    LiquidAlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.create_group)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.group_name)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = notes,
-                    onValueChange = { notes = it },
-                    label = { Text(stringResource(R.string.notes_optional)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
+        title = stringResource(R.string.create_group),
+        confirmButtonText = stringResource(R.string.save),
+        onConfirm = {
+            if (name.isNotBlank()) {
+                onCreate(name, notes.ifBlank { null })
             }
         },
-        confirmButton = {
-            TextButton(
-                onClick = { onCreate(name, notes.ifBlank { null }) },
-                enabled = name.isNotBlank()
-            ) {
-                Text(stringResource(R.string.save))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
+        dismissButtonText = stringResource(R.string.cancel),
+        onDismiss = onDismiss
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            LiquidTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = stringResource(R.string.group_name),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            LiquidTextField(
+                value = notes,
+                onValueChange = { notes = it },
+                label = stringResource(R.string.notes_optional),
+                modifier = Modifier.fillMaxWidth()
+            )
         }
-    )
+    }
 }

@@ -36,7 +36,8 @@ data class LiveSet(
     val rpe: Int? = null,
     val isCompleted: Boolean = false,
     val weightDisplay: String = "",
-    val repsDisplay: String = ""
+    val repsDisplay: String = "",
+    val prevWeightDisplay: String? = null
 )
 
 /** In-memory exercise block during a live workout. */
@@ -138,12 +139,16 @@ class LiveWorkoutViewModel @Inject constructor(
     ): LiveSet {
         val kg = last?.weight ?: 0.0
         val reps = last?.reps ?: 0
+        val prevLabel = last?.let {
+            "${WeightUtils.formatWeight(it.weight, unit)} × ${it.reps}"
+        }
         return LiveSet(
             setNumber = number,
             weightKg = kg,
             reps = reps,
             weightDisplay = if (kg > 0) WeightUtils.formatWeightNumber(kg, unit) else "",
-            repsDisplay = if (reps > 0) reps.toString() else ""
+            repsDisplay = if (reps > 0) reps.toString() else "",
+            prevWeightDisplay = prevLabel
         )
     }
 

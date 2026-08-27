@@ -1,27 +1,29 @@
 /**
  * App settings: units, rest timer, theme, and maintenance actions.
+ * Refactored with Liquid Glass / Liquid Vitality visual aesthetic.
  */
 package com.overloadtracker.ui.screens.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,15 +33,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.overloadtracker.R
 import com.overloadtracker.data.preferences.AppThemeMode
+import com.overloadtracker.ui.components.LiquidAlertDialog
+import com.overloadtracker.ui.components.LiquidGlassCard
+import com.overloadtracker.ui.components.LiquidSecondaryButton
+import com.overloadtracker.ui.components.LiquidTopAppBar
+import com.overloadtracker.ui.theme.CyanAccent
+import com.overloadtracker.ui.theme.ElectricViolet
+import com.overloadtracker.ui.theme.GlassBorderTopLeft
+import com.overloadtracker.ui.theme.LabelCaps
+import com.overloadtracker.ui.theme.MidnightBackground
+import com.overloadtracker.ui.theme.SunsetRose
+import com.overloadtracker.ui.theme.TextOnSurface
+import com.overloadtracker.ui.theme.TextOnSurfaceVariant
 import com.overloadtracker.util.Constants
 import com.overloadtracker.util.WeightUnit
 
 /**
- * Settings screen for user preferences and destructive maintenance.
+ * Settings screen for user preferences and maintenance in Liquid Glass style.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,9 +68,13 @@ fun SettingsScreen(
     var showResetDialog by remember { mutableStateOf(false) }
 
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.background(MidnightBackground),
+        containerColor = MidnightBackground,
         topBar = {
-            TopAppBar(title = { Text(stringResource(R.string.nav_settings)) })
+            LiquidTopAppBar(
+                title = "SYSTEM SETTINGS",
+                subtitle = "PREFERENCES & MAINTENANCE"
+            )
         }
     ) { padding ->
         Column(
@@ -63,93 +83,148 @@ fun SettingsScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Weight Unit", style = MaterialTheme.typography.titleMedium)
-            RadioRow(
-                label = stringResource(R.string.units_kg),
-                selected = uiState.weightUnit == WeightUnit.KG,
-                onClick = { viewModel.setWeightUnit(WeightUnit.KG) }
-            )
-            RadioRow(
-                label = stringResource(R.string.units_lb),
-                selected = uiState.weightUnit == WeightUnit.LB,
-                onClick = { viewModel.setWeightUnit(WeightUnit.LB) }
-            )
-
-            HorizontalDivider()
-
-            Text(
-                text = "${stringResource(R.string.rest_timer)}: ${uiState.restSeconds}s",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Slider(
-                value = uiState.restSeconds.toFloat(),
-                onValueChange = { viewModel.setRestSeconds(it.toInt()) },
-                valueRange = Constants.MIN_REST_SECONDS.toFloat()..Constants.MAX_REST_SECONDS.toFloat(),
-                steps = ((Constants.MAX_REST_SECONDS - Constants.MIN_REST_SECONDS) / 15) - 1,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            HorizontalDivider()
-
-            Text("Theme", style = MaterialTheme.typography.titleMedium)
-            RadioRow(
-                label = stringResource(R.string.theme_system),
-                selected = uiState.themeMode == AppThemeMode.SYSTEM,
-                onClick = { viewModel.setThemeMode(AppThemeMode.SYSTEM) }
-            )
-            RadioRow(
-                label = stringResource(R.string.theme_light),
-                selected = uiState.themeMode == AppThemeMode.LIGHT,
-                onClick = { viewModel.setThemeMode(AppThemeMode.LIGHT) }
-            )
-            RadioRow(
-                label = stringResource(R.string.theme_dark),
-                selected = uiState.themeMode == AppThemeMode.DARK,
-                onClick = { viewModel.setThemeMode(AppThemeMode.DARK) }
-            )
-
-            HorizontalDivider()
-
-            OutlinedButton(
-                onClick = { showClearDialog = true },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 48.dp)
+            // Section 1: Weight Unit
+            LiquidGlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                padding = 16.dp
             ) {
-                Text(stringResource(R.string.clear_history))
+                Text(
+                    text = "WEIGHT UNIT",
+                    style = LabelCaps.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                    color = CyanAccent,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                RadioRow(
+                    label = stringResource(R.string.units_kg),
+                    selected = uiState.weightUnit == WeightUnit.KG,
+                    onClick = { viewModel.setWeightUnit(WeightUnit.KG) }
+                )
+                RadioRow(
+                    label = stringResource(R.string.units_lb),
+                    selected = uiState.weightUnit == WeightUnit.LB,
+                    onClick = { viewModel.setWeightUnit(WeightUnit.LB) }
+                )
             }
-            OutlinedButton(
-                onClick = { showResetDialog = true },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 48.dp)
+
+            // Section 2: Default Rest Timer
+            LiquidGlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                padding = 16.dp
             ) {
-                Text(stringResource(R.string.reset_database))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.rest_timer).uppercase(),
+                        style = LabelCaps.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                        color = CyanAccent
+                    )
+                    Text(
+                        text = "${uiState.restSeconds} SECONDS",
+                        style = LabelCaps.copy(fontSize = 13.sp, fontWeight = FontWeight.Bold),
+                        color = ElectricViolet
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Slider(
+                    value = uiState.restSeconds.toFloat(),
+                    onValueChange = { viewModel.setRestSeconds(it.toInt()) },
+                    valueRange = Constants.MIN_REST_SECONDS.toFloat()..Constants.MAX_REST_SECONDS.toFloat(),
+                    steps = ((Constants.MAX_REST_SECONDS - Constants.MIN_REST_SECONDS) / 15) - 1,
+                    colors = SliderDefaults.colors(
+                        thumbColor = CyanAccent,
+                        activeTrackColor = ElectricViolet,
+                        inactiveTrackColor = GlassBorderTopLeft
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            // Section 3: Appearance / Theme Mode
+            LiquidGlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                padding = 16.dp
+            ) {
+                Text(
+                    text = "APPEARANCE MODE",
+                    style = LabelCaps.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                    color = CyanAccent,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                RadioRow(
+                    label = stringResource(R.string.theme_system),
+                    selected = uiState.themeMode == AppThemeMode.SYSTEM,
+                    onClick = { viewModel.setThemeMode(AppThemeMode.SYSTEM) }
+                )
+                RadioRow(
+                    label = stringResource(R.string.theme_light),
+                    selected = uiState.themeMode == AppThemeMode.LIGHT,
+                    onClick = { viewModel.setThemeMode(AppThemeMode.LIGHT) }
+                )
+                RadioRow(
+                    label = stringResource(R.string.theme_dark),
+                    selected = uiState.themeMode == AppThemeMode.DARK,
+                    onClick = { viewModel.setThemeMode(AppThemeMode.DARK) }
+                )
+            }
+
+            // Section 4: Maintenance Actions
+            LiquidGlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                padding = 16.dp
+            ) {
+                Text(
+                    text = "MAINTENANCE & RESET",
+                    style = LabelCaps.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                    color = SunsetRose,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    LiquidSecondaryButton(
+                        text = stringResource(R.string.clear_history),
+                        onClick = { showClearDialog = true },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    LiquidSecondaryButton(
+                        text = stringResource(R.string.reset_database),
+                        onClick = { showResetDialog = true },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     }
 
     if (showClearDialog) {
-        ConfirmDialog(
+        LiquidAlertDialog(
+            onDismissRequest = { showClearDialog = false },
             title = stringResource(R.string.clear_history),
-            body = "This permanently deletes all workout history.",
+            bodyText = "This permanently deletes all workout history.",
+            confirmButtonText = stringResource(R.string.confirm),
             onConfirm = {
                 viewModel.clearHistory()
                 showClearDialog = false
             },
+            dismissButtonText = stringResource(R.string.cancel),
             onDismiss = { showClearDialog = false }
         )
     }
+
     if (showResetDialog) {
-        ConfirmDialog(
+        LiquidAlertDialog(
+            onDismissRequest = { showResetDialog = false },
             title = stringResource(R.string.reset_database),
-            body = "This re-imports the exercise library from assets.",
+            bodyText = "This re-imports the exercise library from assets.",
+            confirmButtonText = stringResource(R.string.confirm),
             onConfirm = {
                 viewModel.resetDatabase()
                 showResetDialog = false
             },
+            dismissButtonText = stringResource(R.string.cancel),
             onDismiss = { showResetDialog = false }
         )
     }
@@ -161,37 +236,26 @@ private fun RadioRow(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    androidx.compose.foundation.layout.Row(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp),
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RadioButton(selected = selected, onClick = onClick)
-        Text(text = label, modifier = Modifier.padding(start = 8.dp))
+        RadioButton(
+            selected = selected,
+            onClick = onClick,
+            colors = RadioButtonDefaults.colors(
+                selectedColor = ElectricViolet,
+                unselectedColor = TextOnSurfaceVariant
+            )
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = TextOnSurface,
+            modifier = Modifier.padding(start = 8.dp)
+        )
     }
-}
-
-@Composable
-private fun ConfirmDialog(
-    title: String,
-    body: String,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = { Text(body) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
 }

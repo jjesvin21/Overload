@@ -1,0 +1,405 @@
+<!DOCTYPE html><html class="dark" lang="en"><head></head><body class="bg-true-black text-on-background min-h-screen relative overflow-x-hidden pb-32"><svg aria-hidden="true" class="inline-defs-container" style="position:absolute;width:0;height:0;overflow:hidden"></svg>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Workout History - Overload</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-tint": "#ffb59f",
+                "primary-container": "#ff571b",
+                "on-primary-fixed": "#3a0a00",
+                "on-primary-fixed-variant": "#852400",
+                "secondary-container": "#454747",
+                "success-green": "#2DCC71",
+                "primary-fixed": "#ffdbd0",
+                "charcoal": "#121212",
+                "surface": "#131313",
+                "outline": "#ac897e",
+                "secondary": "#c6c6c7",
+                "on-secondary-fixed": "#1a1c1c",
+                "surface-bright": "#393939",
+                "strava-orange": "#FC4C02",
+                "surface-variant": "#353534",
+                "background": "#131313",
+                "on-tertiary-fixed-variant": "#474746",
+                "surface-dim": "#131313",
+                "tertiary": "#c8c6c5",
+                "tertiary-container": "#929090",
+                "surface-container": "#201f1f",
+                "secondary-fixed": "#e2e2e2",
+                "on-tertiary-container": "#2a2a2a",
+                "on-surface-variant": "#e6beb2",
+                "on-error": "#690005",
+                "tertiary-fixed": "#e5e2e1",
+                "inverse-on-surface": "#313030",
+                "on-background": "#e5e2e1",
+                "surface-container-highest": "#353534",
+                "on-secondary-container": "#b4b5b5",
+                "pr-gold": "#D4AF37",
+                "on-secondary-fixed-variant": "#454747",
+                "on-secondary": "#2f3131",
+                "on-surface": "#e5e2e1",
+                "error": "#ffb4ab",
+                "true-black": "#000000",
+                "inverse-surface": "#e5e2e1",
+                "surface-gray": "#1E1E1E",
+                "on-primary": "#5e1700",
+                "secondary-fixed-dim": "#c6c6c7",
+                "on-tertiary": "#303030",
+                "primary": "#ffb59f",
+                "tertiary-fixed-dim": "#c8c6c5",
+                "on-tertiary-fixed": "#1b1b1c",
+                "primary-fixed-dim": "#ffb59f",
+                "on-primary-container": "#531300",
+                "on-error-container": "#ffdad6",
+                "error-container": "#93000a",
+                "surface-container-high": "#2a2a2a",
+                "surface-container-lowest": "#0e0e0e",
+                "surface-container-low": "#1c1b1b",
+                "outline-variant": "#5c4038",
+                "inverse-primary": "#ae3100"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "section-margin": "2rem",
+                "element-gap": "1rem",
+                "inner-padding-sm": "1rem",
+                "glass-blur": "24px",
+                "inner-padding-lg": "1.5rem",
+                "container-padding": "1.5rem"
+        },
+        "fontFamily": {
+                "body-lg": [
+                        "Inter"
+                ],
+                "headline-lg": [
+                        "Inter"
+                ],
+                "headline-lg-mobile": [
+                        "Inter"
+                ],
+                "display-metrics": [
+                        "Inter"
+                ],
+                "numeric-data": [
+                        "Inter"
+                ],
+                "body-md": [
+                        "Inter"
+                ],
+                "headline-md": [
+                        "Inter"
+                ],
+                "label-caps": [
+                        "JetBrains Mono"
+                ]
+        },
+        "fontSize": {
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "28px",
+                        {
+                                "lineHeight": "34px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "display-metrics": [
+                        "48px",
+                        {
+                                "lineHeight": "52px",
+                                "letterSpacing": "-0.04em",
+                                "fontWeight": "800"
+                        }
+                ],
+                "numeric-data": [
+                        "20px",
+                        {
+                                "lineHeight": "24px",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "label-caps": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.1em",
+                                "fontWeight": "600"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        .glass-panel {
+            background: #121212;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(252, 76, 2, 0.5);
+        }
+        .bg-blob {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.10;
+            z-index: -1;
+            border-radius: 50%;
+            animation: drift 20s infinite alternate ease-in-out;
+        }
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(10%, 5%) scale(1.1); }
+            100% { transform: translate(-5%, 10%) scale(0.9); }
+        }
+    </style>
+<!-- Atmospheric Background -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+<div class="bg-blob bg-strava-orange w-[500px] h-[500px] top-[-10%] left-[-10%]"></div>
+<div class="bg-blob bg-strava-orange/80 w-[400px] h-[400px] bottom-[20%] right-[-5%] animation-delay-2000"></div>
+</div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-true-black/60 dark:bg-true-black/60 backdrop-blur-glass border-b border-on-background/10 shadow-none">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="Close up profile photo of an athletic user with dramatic studio lighting against a dark background. The image should have a cool, high-tech vibe matching a premium fitness app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-n86GUg01SMLk834YK9MiAHrh2FWOshrSjV7bhBXlYDWROXi5AgG0h0lzMWLnoPEtgvmY9AfoS1MQytZs6gjp62z9IJ-uheEcM3nn_MNLBuEDlbITUpNjgTXvgyWqZhShh3Fip2DfSvZqk0ijtT6zfgUKDbStbSWo2SXqbL8G7301oQMX0OyXIjkArQGqc_zmKS6qPpnVHoiVDxcnmq6l-ScrNLXLw8zndabnbQtUrPn-ArGjry3x2w">
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg bg-clip-text text-transparent bg-gradient-to-r from-strava-orange to-strava-orange/80">Overload</h1>
+</div>
+<button class="text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined text-2xl">settings</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="pt-24 px-container-padding max-w-4xl mx-auto space-y-section-margin">
+<!-- Header & Action -->
+<div class="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+<div>
+<h2 class="font-headline-md text-headline-md text-strava-orange mb-2">History</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Review your past sessions and analyze performance trends.</p>
+</div>
+<button class="glass-panel px-6 py-3 rounded-lg flex items-center justify-center gap-2 text-strava-orange hover:opacity-80 transition-opacity active:scale-95 shadow-[0_0_15px_rgba(252,76,2,0.15)]">
+<span class="material-symbols-outlined">download</span>
+<span class="font-label-caps text-label-caps">Export CSV</span>
+</button>
+</div>
+<!-- Volume Trend Chart (Placeholder for visual) -->
+<section class="glass-panel p-inner-padding-lg rounded-xl flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-body-lg text-body-lg text-on-surface">Workout Consistency</h3>
+<p class="text-label-caps text-on-surface-variant/70 mt-1">Last 12 Months</p>
+</div>
+<div class="text-right">
+<div class="font-numeric-data text-numeric-data text-strava-orange text-glow">156</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant/70">Workouts this year</div>
+</div>
+</div>
+<div class="overflow-x-auto pb-2">
+<div class="flex gap-1 min-w-max">
+<!-- Simulated 12-month heatmap grid (simplified for mobile view) -->
+<div class="grid grid-rows-7 grid-flow-col gap-1">
+<!-- Generating a representative set of cells -->
+<div class="w-3 h-3 rounded-sm bg-surface-container-low"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/30"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/60"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange"></div>
+<div class="w-3 h-3 rounded-sm bg-surface-container-low"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/30"></div>
+<div class="w-3 h-3 rounded-sm bg-surface-container-low"></div>
+<!-- Repeat pattern for visual effect -->
+<div class="w-3 h-3 rounded-sm bg-strava-orange/60"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/30"></div>
+<div class="w-3 h-3 rounded-sm bg-surface-container-low"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/60"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/30"></div>
+<!-- More columns to fill space -->
+<div class="w-3 h-3 rounded-sm bg-surface-container-low"></div>
+<div class="w-3 h-3 rounded-sm bg-surface-container-low"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/30"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/60"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/30"></div>
+<div class="w-3 h-3 rounded-sm bg-surface-container-low"></div>
+<!-- Additional columns for density -->
+<div class="w-3 h-3 rounded-sm bg-strava-orange/30"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/60"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/60"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/30"></div>
+<div class="w-3 h-3 rounded-sm bg-surface-container-low"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/30"></div>
+<!-- Final columns -->
+<div class="w-3 h-3 rounded-sm bg-strava-orange/60"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/60"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/30"></div>
+<div class="w-3 h-3 rounded-sm bg-surface-container-low"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/30"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/60"></div>
+</div>
+</div>
+</div>
+<div class="flex justify-end items-center gap-2 mt-2">
+<span class="text-label-caps text-on-surface-variant/50">Less</span>
+<div class="flex gap-1">
+<div class="w-3 h-3 rounded-sm bg-surface-container-low"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/30"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange/60"></div>
+<div class="w-3 h-3 rounded-sm bg-strava-orange"></div>
+</div>
+<span class="text-label-caps text-on-surface-variant/50">More</span>
+</div>
+</section>
+<!-- Session List -->
+<section class="space-y-element-gap">
+<h3 class="font-body-lg text-body-lg text-on-surface mb-4">Recent Sessions</h3>
+<!-- Session Card 1 -->
+<div class="glass-panel p-inner-padding-sm rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-strava-orange">
+<span class="material-symbols-outlined">fitness_center</span>
+</div>
+<div>
+<h4 class="font-headline-md text-headline-md text-on-surface text-lg">Aug 26 - Push A</h4>
+<div class="flex gap-2 mt-2">
+<span class="font-label-caps text-label-caps bg-surface-container-low px-2 py-1 rounded text-on-surface-variant">Chest</span>
+<span class="font-label-caps text-label-caps bg-surface-container-low px-2 py-1 rounded text-on-surface-variant">Shoulders</span>
+</div>
+</div>
+</div>
+<div class="flex md:flex-col items-center md:items-end gap-4 md:gap-1 bg-surface-container-lowest/50 p-3 rounded-lg md:bg-transparent md:p-0">
+<div class="text-center md:text-right">
+<div class="font-numeric-data text-numeric-data text-strava-orange text-glow">8,450 kg</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant/70">Volume</div>
+</div>
+<div class="h-8 w-px bg-outline-variant/30 md:hidden"></div>
+<div class="text-center md:text-right">
+<div class="font-numeric-data text-numeric-data text-on-surface">65m</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant/70">Duration</div>
+</div>
+</div>
+</div>
+<!-- Session Card 2 -->
+<div class="glass-panel p-inner-padding-sm rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-strava-orange">
+<span class="material-symbols-outlined">directions_run</span>
+</div>
+<div>
+<h4 class="font-headline-md text-headline-md text-on-surface text-lg">Aug 24 - Pull &amp; Core</h4>
+<div class="flex gap-2 mt-2">
+<span class="font-label-caps text-label-caps bg-surface-container-low px-2 py-1 rounded text-on-surface-variant">Back</span>
+<span class="font-label-caps text-label-caps bg-surface-container-low px-2 py-1 rounded text-on-surface-variant">Core</span>
+</div>
+</div>
+</div>
+<div class="flex md:flex-col items-center md:items-end gap-4 md:gap-1 bg-surface-container-lowest/50 p-3 rounded-lg md:bg-transparent md:p-0">
+<div class="text-center md:text-right">
+<div class="font-numeric-data text-numeric-data text-strava-orange text-glow">7,120 kg</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant/70">Volume</div>
+</div>
+<div class="h-8 w-px bg-outline-variant/30 md:hidden"></div>
+<div class="text-center md:text-right">
+<div class="font-numeric-data text-numeric-data text-on-surface">55m</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant/70">Duration</div>
+</div>
+</div>
+</div>
+<!-- Session Card 3 -->
+<div class="glass-panel p-inner-padding-sm rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-80">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-strava-orange/70">
+<span class="material-symbols-outlined">fitness_center</span>
+</div>
+<div>
+<h4 class="font-headline-md text-headline-md text-on-surface text-lg">Aug 22 - Legs Heavy</h4>
+<div class="flex gap-2 mt-2">
+<span class="font-label-caps text-label-caps bg-surface-container-low px-2 py-1 rounded text-on-surface-variant">Quads</span>
+<span class="font-label-caps text-label-caps bg-surface-container-low px-2 py-1 rounded text-on-surface-variant">Hamstrings</span>
+</div>
+</div>
+</div>
+<div class="flex md:flex-col items-center md:items-end gap-4 md:gap-1 bg-surface-container-lowest/50 p-3 rounded-lg md:bg-transparent md:p-0">
+<div class="text-center md:text-right">
+<div class="font-numeric-data text-numeric-data text-strava-orange text-glow">12,300 kg</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant/70">Volume</div>
+</div>
+<div class="h-8 w-px bg-outline-variant/30 md:hidden"></div>
+<div class="text-center md:text-right">
+<div class="font-numeric-data text-numeric-data text-on-surface">75m</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant/70">Duration</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 flex justify-around items-center py-3 px-2 bg-surface-container-lowest/80 dark:bg-surface-container-lowest/80 backdrop-blur-glass border border-on-background/12 shadow-[0_0_20px_rgba(252,76,2,0.15)] rounded-full">
+<!-- Inactive: Library -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-strava-orange/80" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">fitness_center</span>
+<span class="font-label-caps text-label-caps mt-1">Library</span>
+</a>
+<!-- Inactive: Workouts -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-strava-orange/80" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">timer</span>
+<span class="font-label-caps text-label-caps mt-1">Workouts</span>
+</a>
+<!-- Active: History -->
+<a class="flex flex-col items-center justify-center text-strava-orange bg-strava-orange/10 rounded-full px-4 py-1 scale-90 transition-all duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">history</span>
+<span class="font-label-caps text-label-caps mt-1">History</span>
+</a>
+<!-- Inactive: Progress -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-strava-orange/80" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">insights</span>
+<span class="font-label-caps text-label-caps mt-1">Settings</span>
+</a>
+</nav>
+
+
+</body></html>

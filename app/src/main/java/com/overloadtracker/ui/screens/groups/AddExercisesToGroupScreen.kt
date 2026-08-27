@@ -1,36 +1,29 @@
 /**
  * Multi-select exercise picker to add exercises to a workout group.
+ * Refactored with Liquid Glass / Liquid Vitality visual aesthetic.
  */
 package com.overloadtracker.ui.screens.groups
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -42,8 +35,13 @@ import com.overloadtracker.R
 import com.overloadtracker.data.local.entity.Exercise
 import com.overloadtracker.data.repository.ExerciseRepository
 import com.overloadtracker.data.repository.WorkoutGroupRepository
+import com.overloadtracker.ui.components.ExerciseCard
 import com.overloadtracker.ui.components.FilterChips
+import com.overloadtracker.ui.components.LiquidPrimaryButton
+import com.overloadtracker.ui.components.LiquidSearchField
+import com.overloadtracker.ui.components.LiquidTopAppBar
 import com.overloadtracker.ui.navigation.AddExercisesRoute
+import com.overloadtracker.ui.theme.MidnightBackground
 import com.overloadtracker.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -110,7 +108,7 @@ class AddExercisesViewModel @Inject constructor(
 }
 
 /**
- * Multi-select library screen with bottom bar confirmation.
+ * Multi-select library screen with bottom bar confirmation in Liquid Glass style.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,88 +124,63 @@ fun AddExercisesToGroupScreen(
     var query by remember { mutableStateOf("") }
 
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.background(MidnightBackground),
+        containerColor = MidnightBackground,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.add_exercises)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
+            LiquidTopAppBar(
+                title = "ADD TO ROUTINE",
+                subtitle = "MULTI-SELECT EXERCISES",
+                onBackClick = onBack
             )
         },
         bottomBar = {
-            Button(
-                onClick = { viewModel.addSelected(onAdded) },
-                enabled = selected.isNotEmpty(),
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .heightIn(min = 48.dp)
             ) {
-                Text(stringResource(R.string.add_selected, selected.size))
+                LiquidPrimaryButton(
+                    text = stringResource(R.string.add_selected, selected.size),
+                    onClick = { viewModel.addSelected(onAdded) },
+                    enabled = selected.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 280.dp),
+                columns = GridCells.Adaptive(minSize = 160.dp),
                 contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
-                    OutlinedTextField(
-                        value = query,
-                        onValueChange = {
-                            query = it
-                            viewModel.setQuery(it)
-                        },
-                        label = { Text(stringResource(R.string.search_exercises)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                    FilterChips(
-                        selectedCategories = categories,
-                        onToggle = viewModel::toggleCategory
-                    )
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        LiquidSearchField(
+                            query = query,
+                            onQueryChange = {
+                                query = it
+                                viewModel.setQuery(it)
+                            },
+                            placeholder = stringResource(R.string.search_exercises),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        FilterChips(
+                            selectedCategories = categories,
+                            onToggle = viewModel::toggleCategory
+                        )
+                    }
                 }
                 items(exercises, key = { it.id }) { exercise ->
-                    SelectableExerciseRow(
+                    ExerciseCard(
                         exercise = exercise,
-                        checked = exercise.id in selected,
-                        onToggle = { viewModel.toggleSelection(exercise.id) }
+                        selected = exercise.id in selected,
+                        onClick = { viewModel.toggleSelection(exercise.id) }
                     )
                 }
             }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SelectableExerciseRow(
-    exercise: Exercise,
-    checked: Boolean,
-    onToggle: () -> Unit
-) {
-    androidx.compose.material3.Card(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onToggle
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Checkbox(checked = checked, onCheckedChange = { onToggle() })
-            Text(
-                text = exercise.name,
-                modifier = Modifier.padding(start = 48.dp)
-            )
         }
     }
 }

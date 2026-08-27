@@ -1,8 +1,11 @@
 /**
  * Searchable exercise library with filters and detail sheet.
+ * Refactored with Liquid Glass / Liquid Vitality visual aesthetic.
  */
 package com.overloadtracker.ui.screens.library
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,15 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,23 +36,31 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.overloadtracker.R
+import com.overloadtracker.data.local.entity.Exercise
+import com.overloadtracker.data.local.entity.WorkoutGroup
 import com.overloadtracker.ui.components.ExerciseCard
 import com.overloadtracker.ui.components.ExerciseDetailSheet
 import com.overloadtracker.ui.components.FilterChips
+import com.overloadtracker.ui.components.LiquidAlertDialog
+import com.overloadtracker.ui.components.LiquidSearchField
+import com.overloadtracker.ui.components.LiquidSecondaryButton
+import com.overloadtracker.ui.components.LiquidTextField
+import com.overloadtracker.ui.theme.ElectricViolet
+import com.overloadtracker.ui.theme.MidnightBackground
+import com.overloadtracker.ui.theme.MidnightSurfaceContainerHigh
+import com.overloadtracker.ui.theme.TextOnSurface
+import com.overloadtracker.ui.theme.TextOnSurfaceVariant
 import com.overloadtracker.ui.viewmodel.SharedExerciseViewModel
-import com.overloadtracker.data.local.entity.Exercise
-import com.overloadtracker.data.local.entity.WorkoutGroup
 import com.overloadtracker.util.titleCase
 
 /**
- * Exercise catalog with debounced search, category chips, and equipment filter.
+ * Exercise catalog with debounced search, category chips, and equipment filter in Liquid Glass style.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseLibraryScreen(
     onViewProgress: (String) -> Unit,
     modifier: Modifier = Modifier,
-    onExerciseSelected: ((com.overloadtracker.data.local.entity.Exercise) -> Unit)? = null,
+    onExerciseSelected: ((Exercise) -> Unit)? = null,
     viewModel: ExerciseLibraryViewModel = hiltViewModel(),
     sharedExerciseViewModel: SharedExerciseViewModel = hiltViewModel()
 ) {
@@ -60,26 +69,32 @@ fun ExerciseLibraryScreen(
     val groups by viewModel.groups.collectAsState()
     var exerciseToAdd by remember { mutableStateOf<Exercise?>(null) }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        OutlinedTextField(
-            value = uiState.query,
-            onValueChange = viewModel::setQuery,
-            label = { Text(stringResource(R.string.search_exercises)) },
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MidnightBackground)
+    ) {
+        LiquidSearchField(
+            query = uiState.query,
+            onQueryChange = viewModel::setQuery,
+            placeholder = stringResource(R.string.search_exercises),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            singleLine = true
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         )
+
         FilterChips(
             selectedCategories = uiState.selectedCategories,
             onToggle = viewModel::toggleCategory
         )
+
         EquipmentDropdown(
             options = uiState.equipmentOptions,
             selected = uiState.selectedEquipment,
             onSelected = viewModel::setEquipment,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
         )
+
         when {
             uiState.isLoading -> {
                 Box(
@@ -87,11 +102,12 @@ fun ExerciseLibraryScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = ElectricViolet)
                         Text(
                             text = stringResource(R.string.loading),
                             modifier = Modifier.padding(top = 12.dp),
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextOnSurfaceVariant
                         )
                     }
                 }
@@ -104,13 +120,13 @@ fun ExerciseLibraryScreen(
                     Text(
                         text = stringResource(R.string.no_exercises_match),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = TextOnSurfaceVariant
                     )
                 }
             }
             else -> {
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 280.dp),
+                    columns = GridCells.Adaptive(minSize = 160.dp),
                     contentPadding = PaddingValues(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -166,31 +182,32 @@ private fun AddExerciseToGroupDialog(
     onDismiss: () -> Unit,
     onSelectGroup: (Long) -> Unit
 ) {
-    AlertDialog(
+    LiquidAlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.add_exercise_to_group, exercise.name)) },
-        text = {
-            if (groups.isEmpty()) {
-                Text(stringResource(R.string.no_groups_to_add))
-            } else {
-                Column {
-                    groups.forEach { group ->
-                        TextButton(
-                            onClick = { onSelectGroup(group.id) },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(group.name)
-                        }
-                    }
+        title = stringResource(R.string.add_exercise_to_group, exercise.name),
+        confirmButtonText = stringResource(R.string.cancel),
+        onConfirm = onDismiss,
+        dismissButtonText = null,
+        onDismiss = null
+    ) {
+        if (groups.isEmpty()) {
+            Text(
+                text = stringResource(R.string.no_groups_to_add),
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextOnSurfaceVariant
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                groups.forEach { group ->
+                    LiquidSecondaryButton(
+                        text = group.name,
+                        onClick = { onSelectGroup(group.id) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
         }
-    )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -207,19 +224,25 @@ private fun EquipmentDropdown(
         onExpandedChange = { expanded = it },
         modifier = modifier.fillMaxWidth()
     ) {
-        OutlinedTextField(
+        LiquidTextField(
             value = selected?.let { titleCase(it) } ?: stringResource(R.string.all_equipment),
             onValueChange = {},
-            readOnly = true,
-            label = { Text(stringResource(R.string.equipment_filter)) },
+            label = stringResource(R.string.equipment_filter),
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            enabled = false,
             modifier = Modifier
-                .menuAnchor()
+                .menuAnchor(type = MenuAnchorType.PrimaryNotEditable, enabled = true)
                 .fillMaxWidth()
+                .clickable { expanded = true }
         )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.background(MidnightSurfaceContainerHigh)
+        ) {
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.all_equipment)) },
+                text = { Text(stringResource(R.string.all_equipment), color = TextOnSurface) },
                 onClick = {
                     onSelected(null)
                     expanded = false
@@ -227,7 +250,7 @@ private fun EquipmentDropdown(
             )
             options.forEach { equipment ->
                 DropdownMenuItem(
-                    text = { Text(titleCase(equipment)) },
+                    text = { Text(titleCase(equipment), color = TextOnSurface) },
                     onClick = {
                         onSelected(equipment)
                         expanded = false

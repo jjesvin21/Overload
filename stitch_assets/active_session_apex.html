@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head></head><body class="bg-true-black text-on-background min-h-screen overflow-x-hidden relative selection:bg-strava-orange selection:text-white"><svg aria-hidden="true" class="inline-defs-container" style="position:absolute;width:0;height:0;overflow:hidden"></svg>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Live Workout Session</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-tint": "#ffb59f",
+                "primary-container": "#ff571b",
+                "on-primary-fixed": "#3a0a00",
+                "on-primary-fixed-variant": "#852400",
+                "secondary-container": "#454747",
+                "success-green": "#2DCC71",
+                "primary-fixed": "#ffdbd0",
+                "charcoal": "#121212",
+                "surface": "#131313",
+                "outline": "#ac897e",
+                "secondary": "#c6c6c7",
+                "on-secondary-fixed": "#1a1c1c",
+                "surface-bright": "#393939",
+                "strava-orange": "#FC4C02",
+                "surface-variant": "#353534",
+                "background": "#131313",
+                "on-tertiary-fixed-variant": "#474746",
+                "surface-dim": "#131313",
+                "tertiary": "#c8c6c5",
+                "tertiary-container": "#929090",
+                "surface-container": "#201f1f",
+                "secondary-fixed": "#e2e2e2",
+                "on-tertiary-container": "#2a2a2a",
+                "on-surface-variant": "#e6beb2",
+                "on-error": "#690005",
+                "tertiary-fixed": "#e5e2e1",
+                "inverse-on-surface": "#313030",
+                "on-background": "#e5e2e1",
+                "surface-container-highest": "#353534",
+                "on-secondary-container": "#b4b5b5",
+                "pr-gold": "#D4AF37",
+                "on-secondary-fixed-variant": "#454747",
+                "on-secondary": "#2f3131",
+                "on-surface": "#e5e2e1",
+                "error": "#ffb4ab",
+                "true-black": "#000000",
+                "inverse-surface": "#e5e2e1",
+                "surface-gray": "#1E1E1E",
+                "on-primary": "#5e1700",
+                "secondary-fixed-dim": "#c6c6c7",
+                "on-tertiary": "#303030",
+                "primary": "#ffb59f",
+                "tertiary-fixed-dim": "#c8c6c5",
+                "on-tertiary-fixed": "#1b1b1c",
+                "primary-fixed-dim": "#ffb59f",
+                "on-primary-container": "#531300",
+                "on-error-container": "#ffdad6",
+                "error-container": "#93000a",
+                "surface-container-high": "#2a2a2a",
+                "surface-container-lowest": "#0e0e0e",
+                "surface-container-low": "#1c1b1b",
+                "outline-variant": "#5c4038",
+                "inverse-primary": "#ae3100"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "stack-sm": "0.5rem",
+                "gutter": "1rem",
+                "stack-md": "1rem",
+                "glass-blur": "24px",
+                "margin-page": "1.5rem",
+                "stack-lg": "2rem"
+        },
+        "fontFamily": {
+                "body-lg": [
+                        "Inter"
+                ],
+                "headline-lg": [
+                        "Inter"
+                ],
+                "headline-lg-mobile": [
+                        "Inter"
+                ],
+                "display-metrics": [
+                        "Inter"
+                ],
+                "numeric-data": [
+                        "Inter"
+                ],
+                "body-md": [
+                        "Inter"
+                ],
+                "headline-md": [
+                        "Inter"
+                ],
+                "label-caps": [
+                        "JetBrains Mono"
+                ]
+        },
+        "fontSize": {
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "28px",
+                        {
+                                "lineHeight": "34px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "display-metrics": [
+                        "48px",
+                        {
+                                "lineHeight": "52px",
+                                "letterSpacing": "-0.04em",
+                                "fontWeight": "800"
+                        }
+                ],
+                "numeric-data": [
+                        "20px",
+                        {
+                                "lineHeight": "24px",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "label-caps": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.1em",
+                                "fontWeight": "600"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Custom Utilities for Glassmorphism */
+        .glass-card {
+            background: rgba(18, 18, 18, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(229, 226, 225, 0.1);
+        }
+        
+        .etched-input {
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .etched-input:focus {
+            border-color: rgba(252, 76, 2, 0.5);
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(252, 76, 2, 0.2);
+        }
+        
+        /* Blob Animation */
+        @keyframes blob-float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        .animate-blob {
+            animation: blob-float 15s infinite alternate ease-in-out;
+        }
+        
+        /* Progress Ring Animation */
+        @keyframes stroke-dash {
+            from { stroke-dashoffset: 283; } /* 2 * PI * r (45) */
+            to { stroke-dashoffset: 0; }
+        }
+        
+        .animate-ring {
+            stroke-dasharray: 283;
+            animation: stroke-dash 90s linear forwards; /* 1:30 timer */
+        }
+    </style>
+<!-- Atmospheric Background (Level 0) -->
+<div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+<div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-strava-orange/10 rounded-full blur-[100px] animate-blob"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] bg-surface-bright/10 rounded-full blur-[120px] animate-blob" style="animation-delay: -5s;"></div>
+</div>
+<!-- Main Content Container (Safe Zones applied) -->
+<main class="relative z-10 flex flex-col min-h-screen pb-[120px]">
+<!-- Active Workout Header (Replaces TopAppBar for linear flow) -->
+<header class="w-full flex items-center justify-between px-margin-page py-4 sticky top-0 z-50 glass-card border-none border-b border-white/5 rounded-none">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-highest/50 hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-secondary">keyboard_arrow_down</span>
+</button>
+<div class="flex flex-col items-center">
+<span class="font-label-caps text-label-caps text-secondary mb-1">CHEST &amp; TRICEPS</span>
+<span class="font-display-metrics text-display-metrics text-strava-orange tracking-tight leading-none">42:15</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-highest/50 hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-secondary">more_vert</span>
+</button>
+</header>
+<div class="px-margin-page pt-stack-lg flex-1 flex flex-col gap-gutter">
+<!-- Exercise Media & Header -->
+<div class="flex flex-col gap-4">
+<div class="w-full h-48 rounded-xl overflow-hidden glass-card relative group border-white/10">
+<img class="w-full h-full object-cover opacity-80 mix-blend-screen transition-opacity group-hover:opacity-100" data-alt="A highly detailed, cinematic 3D animation still of a sleek, futuristic barbell bench press station in a dark, atmospheric premium gym. The lighting is dramatic, with glowing neon violet and cyan strips highlighting the metallic texture of the weights. The style is hyper-realistic glassmorphism, matching a high-end fitness tracking app interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk4qcFeBOjsYPxc_VJVUBKXhDKgs7mwjiUJwPDU7RaMqtn24lMLCx4orI6Eisirq_58uyR-jsQ2twU3jFKBBBpX8wDz6vTMAipewjYZCob-aNlHe4-B2u6Wdxu6nWK8i0drCfW124cHMh_urrFOfHuieQtH-ptISB9X2F4-g0xFgunkZIK3uNGWmTvstqC_TE3SU2jia_NdtnxR7c_O_btyOhngattjpq-751jr8SDY-FHeJonSaXAzQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-true-black via-transparent to-transparent"></div>
+<div class="absolute bottom-3 right-3 bg-surface-container-highest/80 backdrop-blur-md rounded-full px-3 py-1 flex items-center gap-1 border border-white/10">
+<span class="material-symbols-outlined text-[16px] text-tertiary">videocam</span>
+<span class="font-label-caps text-label-caps text-on-surface">Auto-play</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-background">Barbell Bench Press</h1>
+<p class="font-body-md text-body-md text-secondary">Exercise 2 of 6 • Target: Pectoralis Major</p>
+</div>
+</div>
+<!-- Set Logging Table (Glass Card Level 1) -->
+<div class="glass-card rounded-xl p-stack-md flex flex-col gap-4 mt-4">
+<!-- Table Header -->
+<div class="grid gap-2 items-center pb-2 border-b border-white/10 px-2 grid-cols-[3rem_1fr_1.2fr_1.2fr_3rem]">
+<span class="font-label-caps text-label-caps text-secondary text-center">SET</span>
+<span class="font-label-caps text-label-caps text-secondary text-center">PREV</span>
+<span class="font-label-caps text-label-caps text-secondary text-center">LBS</span>
+<span class="font-label-caps text-label-caps text-secondary text-center">REPS</span>
+<span class="material-symbols-outlined text-secondary text-center text-[18px]">check</span>
+</div>
+<!-- Set Rows -->
+<div class="flex flex-col gap-3">
+<!-- Completed Set -->
+<div class="grid gap-2 items-center px-2 opacity-60 transition-opacity hover:opacity-100 grid-cols-[3rem_1fr_1.2fr_1.2fr_3rem]">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center font-numeric-data text-[14px] text-on-surface">1</div>
+<div class="text-center font-numeric-data text-[14px] text-secondary/60">125</div>
+<input class="w-full h-10 rounded-lg etched-input text-center font-numeric-data text-numeric-data text-on-background placeholder-secondary" readonly="" type="number" value="135"/>
+<input class="w-full h-10 rounded-lg etched-input text-center font-numeric-data text-numeric-data text-on-background placeholder-secondary" readonly="" type="number" value="10"/>
+<button class="w-8 h-8 rounded-lg bg-strava-orange flex items-center justify-center border border-strava-orange shadow-[0_0_10px_rgba(252,76,2,0.3)]">
+<span class="material-symbols-outlined text-white text-[18px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</button>
+</div>
+<!-- Active Set -->
+<div class="grid gap-2 items-center px-2 relative z-10 grid-cols-[3rem_1fr_1.2fr_1.2fr_3rem]">
+<div class="absolute inset-0 bg-strava-orange/5 rounded-lg -z-10 -mx-2"></div>
+<div class="w-8 h-8 rounded-full bg-strava-orange/20 border border-strava-orange/30 flex items-center justify-center font-numeric-data text-[14px] text-strava-orange">2</div>
+<div class="text-center font-numeric-data text-[14px] text-secondary/60">145</div>
+<input class="w-full h-10 rounded-lg etched-input text-center font-numeric-data text-numeric-data text-on-background placeholder-secondary focus:ring-1 focus:ring-strava-orange/50 border-none" placeholder="155" type="number"/>
+<input class="w-full h-10 rounded-lg etched-input text-center font-numeric-data text-numeric-data text-on-background placeholder-secondary focus:ring-1 focus:ring-strava-orange/50 border-none" placeholder="8" type="number"/>
+<button class="w-8 h-8 rounded-lg bg-surface-container-lowest border border-white/20 flex items-center justify-center hover:border-strava-orange/50 transition-colors">
+<span class="material-symbols-outlined text-secondary text-[18px] opacity-50">check</span>
+</button>
+</div>
+<!-- Upcoming Set -->
+<div class="grid gap-2 items-center px-2 grid-cols-[3rem_1fr_1.2fr_1.2fr_3rem]">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center font-numeric-data text-[14px] text-secondary">3</div>
+<div class="text-center font-numeric-data text-[14px] text-secondary/30">-</div>
+<input class="w-full h-10 rounded-lg etched-input text-center font-numeric-data text-numeric-data text-on-background placeholder-secondary/30 border-none" disabled="" placeholder="-" type="number"/>
+<input class="w-full h-10 rounded-lg etched-input text-center font-numeric-data text-numeric-data text-on-background placeholder-secondary/30 border-none" disabled="" placeholder="-" type="number"/>
+<button class="w-8 h-8 rounded-lg bg-surface-container-lowest border border-white/10 flex items-center justify-center opacity-50" disabled="">
+<span class="material-symbols-outlined text-secondary text-[18px] opacity-30">check</span>
+</button>
+</div>
+</div>
+<button class="mt-2 w-full py-2 flex items-center justify-center gap-2 text-strava-orange font-label-caps text-label-caps hover:bg-strava-orange/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    ADD SET
+                </button>
+</div>
+<!-- Rest Timer Widget (Circular Glass) -->
+<div class="glass-card rounded-xl p-margin-page flex items-center justify-center gap-6 mt-4 relative overflow-hidden">
+<!-- Inner glow top edge -->
+<div class="absolute top-0 left-0 right-0 h-[1px] bg-white/5"></div>
+<div class="flex flex-col gap-1 flex-1">
+<span class="font-label-caps text-label-caps text-secondary">REST TIMER</span>
+<span class="font-body-md text-body-md text-on-surface">Stay warm, ready for set 3.</span>
+</div>
+<div class="relative w-24 h-24 flex items-center justify-center">
+<!-- Background SVG Ring -->
+<svg class="absolute inset-0 w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<circle class="text-surface-container-highest" cx="50" cy="50" fill="none" r="45" stroke="currentColor" stroke-linecap="round" stroke-width="6"></circle>
+<!-- Progress SVG Ring -->
+<circle class="animate-ring text-strava-orange" cx="50" cy="50" fill="none" r="45" stroke="currentColor" stroke-linecap="round" stroke-width="6"></circle>
+</svg>
+<!-- Time Display -->
+<span class="font-numeric-data text-numeric-data text-on-background relative z-10">01:14</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Area (Bottom Safe Zone) -->
+<div class="fixed bottom-0 left-0 w-full px-margin-page pb-8 pt-4 bg-gradient-to-t from-true-black via-true-black/90 to-transparent z-50">
+<button class="w-full h-14 rounded-full bg-strava-orange text-white font-headline-md text-[18px] tracking-wide flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(252,76,2,0.3)] hover:shadow-[0_4px_25px_rgba(252,76,2,0.5)] active:scale-[0.98] transition-all relative overflow-hidden group">
+<!-- Glass edge highlight -->
+<div class="absolute top-0 left-0 right-0 h-[1px] bg-white/20"></div>
+<!-- Ripple effect overlay conceptually -->
+<div class="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors"></div>
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">stop_circle</span>
+            FINISH WORKOUT
+        </button>
+</div>
+</body></html>
