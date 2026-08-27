@@ -70,6 +70,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
+import com.overloadtracker.ui.components.ExportOptionsBottomSheet
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun HistoryScreen(
@@ -79,6 +81,9 @@ fun HistoryScreen(
 ) {
     val summaries by viewModel.summaries.collectAsState()
     val exportMessage by viewModel.exportMessage.collectAsState()
+    val showExportSheet by viewModel.showExportSheet.collectAsState()
+    val selectedTimeRange by viewModel.selectedTimeRange.collectAsState()
+    val exportPreviewStats by viewModel.exportPreviewStats.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val csvExportedMessage = stringResource(R.string.csv_exported)
 
@@ -93,6 +98,17 @@ fun HistoryScreen(
                 viewModel.clearExportMessage()
             }
         }
+    }
+
+    if (showExportSheet) {
+        ExportOptionsBottomSheet(
+            onDismiss = viewModel::dismissExportSheet,
+            onShare = viewModel::shareCsv,
+            onSaveToDownloads = viewModel::saveToDownloads,
+            previewStats = exportPreviewStats,
+            initialTimeRange = selectedTimeRange,
+            onTimeRangeChanged = viewModel::setTimeRange
+        )
     }
 
     Scaffold(
@@ -125,7 +141,7 @@ fun HistoryScreen(
                             .clip(CircleShape)
                             .background(SurfaceContainerHighest)
                             .border(1.dp, GlassBorder, CircleShape)
-                            .clickable(onClick = viewModel::exportAll)
+                            .clickable(onClick = viewModel::openExportSheet)
                             .padding(horizontal = 14.dp, vertical = 8.dp),
                         contentAlignment = Alignment.Center
                     ) {

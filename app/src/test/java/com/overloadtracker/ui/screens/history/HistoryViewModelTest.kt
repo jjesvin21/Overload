@@ -109,4 +109,25 @@ class HistoryViewModelTest {
 
         assertEquals(3, state.currentStreak)
     }
+
+    @Test
+    fun `ExportTimeRange computes correct start timestamp epoch ms`() {
+        val refDate = LocalDate.of(2026, 10, 15)
+        val zoneId = ZoneId.systemDefault()
+
+        val allTimeCutoff = com.overloadtracker.data.model.ExportTimeRange.ALL_TIME.getStartTimestampEpochMs(refDate)
+        org.junit.Assert.assertNull(allTimeCutoff)
+
+        val sevenDaysCutoff = com.overloadtracker.data.model.ExportTimeRange.LAST_7_DAYS.getStartTimestampEpochMs(refDate)
+        val expectedSevenDays = refDate.minusDays(7).atStartOfDay(zoneId).toInstant().toEpochMilli()
+        assertEquals(expectedSevenDays, sevenDaysCutoff)
+
+        val thirtyDaysCutoff = com.overloadtracker.data.model.ExportTimeRange.LAST_30_DAYS.getStartTimestampEpochMs(refDate)
+        val expectedThirtyDays = refDate.minusDays(30).atStartOfDay(zoneId).toInstant().toEpochMilli()
+        assertEquals(expectedThirtyDays, thirtyDaysCutoff)
+
+        val thisMonthCutoff = com.overloadtracker.data.model.ExportTimeRange.THIS_MONTH.getStartTimestampEpochMs(refDate)
+        val expectedThisMonth = refDate.withDayOfMonth(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
+        assertEquals(expectedThisMonth, thisMonthCutoff)
+    }
 }

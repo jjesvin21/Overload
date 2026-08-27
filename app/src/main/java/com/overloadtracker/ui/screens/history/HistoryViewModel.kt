@@ -6,6 +6,7 @@ package com.overloadtracker.ui.screens.history
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.overloadtracker.data.model.ExportTimeRange
 import com.overloadtracker.data.model.WorkoutSummary
 import com.overloadtracker.data.repository.WorkoutSessionRepository
 import com.overloadtracker.util.CsvExporter
@@ -68,6 +69,15 @@ class HistoryViewModel @Inject constructor(
     private val _selectedDay = MutableStateFlow<HeatmapDay?>(null)
     val selectedDay: StateFlow<HeatmapDay?> = _selectedDay.asStateFlow()
 
+    private val _showExportSheet = MutableStateFlow(false)
+    val showExportSheet: StateFlow<Boolean> = _showExportSheet.asStateFlow()
+
+    private val _selectedTimeRange = MutableStateFlow(ExportTimeRange.ALL_TIME)
+    val selectedTimeRange: StateFlow<ExportTimeRange> = _selectedTimeRange.asStateFlow()
+
+    private val _exportPreviewStats = MutableStateFlow<Pair<Int, Int>?>(null)
+    val exportPreviewStats: StateFlow<Pair<Int, Int>?> = _exportPreviewStats.asStateFlow()
+
     val summaries: StateFlow<List<WorkoutSummary>> = sessionRepository.observeSummaries()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -82,13 +92,52 @@ class HistoryViewModel @Inject constructor(
         _selectedDay.value = day
     }
 
-    fun exportAll() {
+    fun openExportSheet() {
+        _showExportSheet.value = true
+        updatePreviewStats(_selectedTimeRange.value)
+    }
+
+    fun dismissExportSheet() {
+        _showExportSheet.value = false
+    }
+
+    fun setTimeRange(range: ExportTimeRange) {
+        _selectedTimeRange.value = range
+        updatePreviewStats(range)
+    }
+
+    private fun updatePreviewStats(range: ExportTimeRange) {
         viewModelScope.launch {
-            val rows = sessionRepository.buildCsvRows()
-            val csv = CsvExporter.buildCsv(rows)
-            val uri = CsvExporter.saveToDownloads(context, csv)
-            _exportMessage.value = if (uri != null) "exported" else "failed"
+            val cutoff = range.getStartTimestampEpochMs()
+            _exportPreviewStats.value = sessionRepository.getExportPreview(startTimeCutoff = cutoff)
         }
+    }
+
+    fun shareCsv(range: ExportTimeRange) {
+        viewModelScope.launch {
+            val cutoff = range.getStartTimestampEpochMs()
+            val rows = sessionRepository.buildCsvRows(startTimeCutoff = cutoff)
+            val csv = CsvExporter.buildCsv(rows)
+            val prefix = if (range == ExportTimeRange.ALL_TIME) "WorkoutHistory_AllTime" else "WorkoutHistory_${range.name}"
+            CsvExporter.shareCsvFile(context, csv, prefix = prefix)
+            dismissExportSheet()
+        }
+    }
+
+    fun saveToDownloads(range: ExportTimeRange) {
+        viewModelScope.launch {
+            val cutoff = range.getStartTimestampEpochMs()
+            val rows = sessionRepository.buildCsvRows(startTimeCutoff = cutoff)
+            val csv = CsvExporter.buildCsv(rows)
+            val prefix = if (range == ExportTimeRange.ALL_TIME) "WorkoutHistory_AllTime" else "WorkoutHistory_${range.name}"
+            val uri = CsvExporter.saveToDownloads(context, csv, prefix = prefix)
+            _exportMessage.value = if (uri != null) "exported" else "failed"
+            dismissExportSheet()
+        }
+    }
+
+    fun exportAll() {
+        saveToDownloads(ExportTimeRange.ALL_TIME)
     }
 
     fun clearExportMessage() {

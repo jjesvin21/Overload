@@ -116,11 +116,13 @@ class WorkoutSessionRepository @Inject constructor(
 
     suspend fun clearHistory() = sessionDao.clearAllSessions()
 
-    suspend fun buildCsvRows(sessionId: Long? = null): List<CsvExportRow> {
+    suspend fun buildCsvRows(sessionId: Long? = null, startTimeCutoff: Long? = null): List<CsvExportRow> {
         val loaded = if (sessionId != null) {
             listOfNotNull(sessionDao.getSessionWithSetsOnce(sessionId))
         } else {
             sessionDao.getAllSessionsWithSetsSync()
+        }.filter { sws ->
+            startTimeCutoff == null || sws.session.endTime >= startTimeCutoff
         }
         val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
         return loaded.flatMap { sws ->
@@ -144,6 +146,18 @@ class WorkoutSessionRepository @Inject constructor(
                 )
             }
         }
+    }
+
+    suspend fun getExportPreview(sessionId: Long? = null, startTimeCutoff: Long? = null): Pair<Int, Int> {
+        val loaded = if (sessionId != null) {
+            listOfNotNull(sessionDao.getSessionWithSetsOnce(sessionId))
+        } else {
+            sessionDao.getAllSessionsWithSetsSync()
+        }.filter { sws ->
+            startTimeCutoff == null || sws.session.endTime >= startTimeCutoff
+        }
+        val totalSets = loaded.sumOf { it.sets.size }
+        return Pair(loaded.size, totalSets)
     }
 
     suspend fun isPersonalRecord(exerciseId: String, weight: Double, excludeSessionId: Long?): Boolean {
