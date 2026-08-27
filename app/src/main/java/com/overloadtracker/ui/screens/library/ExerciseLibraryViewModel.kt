@@ -11,7 +11,9 @@ import com.overloadtracker.data.repository.ExerciseRepository
 import com.overloadtracker.data.repository.WorkoutGroupRepository
 import com.overloadtracker.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -36,7 +38,7 @@ data class ExerciseLibraryUiState(
 /**
  * Manages search, category multi-select, and equipment filtering for the library.
  */
-@OptIn(FlowPreview::class)
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ExerciseLibraryViewModel @Inject constructor(
     private val exerciseRepository: ExerciseRepository,
@@ -58,29 +60,39 @@ class ExerciseLibraryViewModel @Inject constructor(
     val groups: StateFlow<List<WorkoutGroup>> = groupRepository.observeGroups()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val uiState: StateFlow<ExerciseLibraryUiState> = combine(
-        _query.debounce(Constants.SEARCH_DEBOUNCE_MS),
+    private val _debouncedQuery = _query.debounce { query ->
+        if (query.isEmpty()) 0L else Constants.SEARCH_DEBOUNCE_MS
+    }
+
+    private val _filteredExercises: Flow<List<Exercise>> = combine(
+        _debouncedQuery,
         _categories,
-        _equipment,
-        _isLoading,
-        exerciseRepository.observeEquipment()
-    ) { debouncedQuery, categories, equipment, loading, equipmentList ->
-        ExerciseLibraryUiState(
+        _equipment
+    ) { debouncedQuery, categories, equipment ->
+        Triple(debouncedQuery, categories, equipment)
+    }.flatMapLatest { (debouncedQuery, categories, equipment) ->
+        exerciseRepository.observeFiltered(
             query = debouncedQuery,
+            categories = categories,
+            equipment = equipment
+        )
+    }
+
+    val uiState: StateFlow<ExerciseLibraryUiState> = combine(
+        _query,
+        _categories,
+        combine(_equipment, equipmentOptions) { eq, opts -> eq to opts },
+        _isLoading,
+        _filteredExercises
+    ) { query, categories, (equipment, equipmentList), loading, exercises ->
+        ExerciseLibraryUiState(
+            query = query,
             selectedCategories = categories,
             selectedEquipment = equipment,
             isLoading = loading,
             equipmentOptions = equipmentList,
-            exercises = emptyList()
+            exercises = exercises
         )
-    }.flatMapLatest { partial ->
-        exerciseRepository.observeFiltered(
-            query = partial.query,
-            categories = partial.selectedCategories,
-            equipment = partial.selectedEquipment
-        ).combine(_isLoading) { exercises, loading ->
-            partial.copy(exercises = exercises, isLoading = loading)
-        }
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),

@@ -28,7 +28,7 @@ interface ExerciseDao {
     @Query(
         """
         SELECT * FROM exercises
-        WHERE (:query = '' OR name LIKE '%' || :query || '%')
+        WHERE (:query = '' OR name LIKE '%' || :query || '%' OR category LIKE '%' || :query || '%' OR target LIKE '%' || :query || '%' OR muscleGroup LIKE '%' || :query || '%' OR equipment LIKE '%' || :query || '%')
           AND (:categoryCount = 0 OR category IN (:categories))
           AND (:equipment = '' OR equipment = :equipment)
         ORDER BY name ASC

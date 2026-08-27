@@ -108,7 +108,7 @@ class AddExercisesViewModel @Inject constructor(
     val categories: StateFlow<Set<String>> = _categories.asStateFlow()
 
     val exercises: StateFlow<List<Exercise>> = combine(
-        _query.debounce(Constants.SEARCH_DEBOUNCE_MS),
+        _query.debounce { if (it.isEmpty()) 0L else Constants.SEARCH_DEBOUNCE_MS },
         _categories
     ) { q, cats -> q to cats }
         .flatMapLatest { (q, cats) ->
