@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -194,6 +195,8 @@ fun LiquidGlassBottomBar(
                                     text = item.title,
                                     style = LabelCaps.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold),
                                     color = StravaOrange,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.padding(start = 6.dp)
                                 )
                             }

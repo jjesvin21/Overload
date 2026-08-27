@@ -214,7 +214,7 @@ fun MyGroupsScreen(
                                     .padding(horizontal = 14.dp, vertical = 4.dp)
                             ) {
                                 Text(
-                                    text = "UP NEXT",
+                                    text = "START NOW",
                                     style = LabelCaps.copy(fontWeight = FontWeight.Bold),
                                     color = StravaOrange
                                 )
@@ -358,7 +358,7 @@ fun MyGroupsScreen(
                 }
             }
 
-            // My Groups Section Header
+            // Exercise Splits Section Header
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -366,13 +366,13 @@ fun MyGroupsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "My Groups",
+                        text = "Exercise Splits",
                         style = MaterialTheme.typography.headlineMedium,
                         color = OnSurface
                     )
                     TextButton(onClick = { showCreateDialog = true }) {
                         Text(
-                            text = "+ New Group",
+                            text = "+ New Split",
                             style = LabelCaps,
                             color = StravaOrange
                         )
@@ -408,7 +408,8 @@ fun MyGroupsScreen(
                         isPrimary = index == 0,
                         onStart = { onStartWorkout(item.group.id) },
                         onEdit = { onEditGroup(item.group.id) },
-                        onDelete = { viewModel.deleteGroup(item.group) }
+                        onDelete = { viewModel.deleteGroup(item.group) },
+                        modifier = Modifier.animateItem()
                     )
                 }
             }
@@ -437,7 +438,8 @@ private fun GroupSwipeCard(
     isPrimary: Boolean,
     onStart: () -> Unit,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
@@ -449,6 +451,7 @@ private fun GroupSwipeCard(
     )
     SwipeToDismissBox(
         state = dismissState,
+        modifier = modifier,
         backgroundContent = {
             Box(
                 modifier = Modifier
@@ -514,12 +517,21 @@ private fun GroupSwipeCard(
                         )
                     }
                 }
-                IconButton(onClick = onEdit) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = stringResource(R.string.edit_group),
-                        tint = OnSurfaceVariant
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onEdit) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = stringResource(R.string.edit_group),
+                            tint = OnSurfaceVariant
+                        )
+                    }
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.delete),
+                            tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f)
+                        )
+                    }
                 }
             }
         }
