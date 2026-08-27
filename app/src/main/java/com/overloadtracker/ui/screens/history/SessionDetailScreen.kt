@@ -85,6 +85,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import androidx.compose.material.icons.filled.Share
+
 @HiltViewModel
 class SessionDetailViewModel @Inject constructor(
     savedStateHandle: androidx.lifecycle.SavedStateHandle,
@@ -112,6 +114,14 @@ class SessionDetailViewModel @Inject constructor(
             val csv = CsvExporter.buildCsv(rows)
             val uri = CsvExporter.saveToDownloads(context, csv, prefix = "WorkoutSession")
             onResult(uri != null)
+        }
+    }
+
+    fun shareSession() {
+        viewModelScope.launch {
+            val rows = sessionRepository.buildCsvRows(sessionId)
+            val csv = CsvExporter.buildCsv(rows)
+            CsvExporter.shareCsvFile(context, csv, prefix = "WorkoutSession")
         }
     }
 }
@@ -165,37 +175,62 @@ fun SessionDetailScreen(
                     }
                 },
                 actions = {
-                    Box(
-                        modifier = Modifier
-                            .padding(end = 12.dp)
-                            .clip(CircleShape)
-                            .background(SurfaceContainerHighest)
-                            .border(1.dp, GlassBorder, CircleShape)
-                            .clickable {
-                                viewModel.exportSession { success ->
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            if (success) exportedMessage else "Export failed"
-                                        )
+                    Row(
+                        modifier = Modifier.padding(end = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Share Action Button
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(StravaOrange)
+                                .clickable { viewModel.shareSession() }
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Share,
+                                    contentDescription = "Share",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    text = "Share",
+                                    style = LabelCaps.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold),
+                                    color = Color.White
+                                )
+                            }
+                        }
+
+                        // Save Download Action Button
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(SurfaceContainerHighest)
+                                .border(1.dp, GlassBorder, CircleShape)
+                                .clickable {
+                                    viewModel.exportSession { success ->
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                if (success) exportedMessage else "Export failed"
+                                            )
+                                        }
                                     }
                                 }
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Download,
+                                    contentDescription = null,
+                                    tint = StravaOrange,
+                                    modifier = Modifier.size(16.dp)
+                                )
                             }
-                            .padding(horizontal = 14.dp, vertical = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Download,
-                                contentDescription = null,
-                                tint = StravaOrange,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text(
-                                text = stringResource(R.string.export_session),
-                                style = LabelCaps.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold),
-                                color = OnSurface
-                            )
                         }
                     }
                 }

@@ -14,6 +14,10 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import android.content.Intent
+import androidx.core.content.FileProvider
+import java.io.File
+
 object CsvExporter {
 
     /**
@@ -70,6 +74,47 @@ object CsvExporter {
             out.write(csv.toByteArray(Charsets.UTF_8))
         } ?: return null
         return uri
+    }
+
+    /**
+     * Writes CSV to cache directory and launches Android share intent chooser.
+     * Allows sharing directly to apps like Claude, Gemini, WhatsApp, etc.
+     *
+     * @return content [Uri] of the shared file, or null on failure.
+     */
+    fun shareCsvFile(context: Context, csv: String, prefix: String = "WorkoutHistory"): Uri? {
+        return try {
+            val stamp = SimpleDateFormat("yyyy-MM-dd_HH-mm", Locale.US).format(Date())
+            val fileName = "${prefix}_$stamp.csv"
+            val exportDir = File(context.cacheDir, "exports")
+            if (!exportDir.exists()) {
+                exportDir.mkdirs()
+            }
+            val file = File(exportDir, fileName)
+            file.writeText(csv, Charsets.UTF_8)
+
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/csv"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_SUBJECT, "Workout History CSV Export")
+                putExtra(Intent.EXTRA_TEXT, "Here is my workout history CSV export.")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            val chooser = Intent.createChooser(intent, "Share Workout CSV")
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(chooser)
+            uri
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     fun escape(field: String): String {
