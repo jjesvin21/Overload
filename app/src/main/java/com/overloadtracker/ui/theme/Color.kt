@@ -1,86 +1,42 @@
 /**
- * Core Color Tokens for Overload Tracker — Liquid Glass / Liquid Vitality design system.
- * Inspired by high-performance obsidian dark mode with electric violet and cyan gradients.
+ * Apex Athletic / Liquid Glass Brand Palette for Overload Tracker.
+ * Obsidian dark mode base with Strava Orange primary accents and glass highlights.
  */
 package com.overloadtracker.ui.theme
 
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-// Midnight Dark Surfaces & Backgrounds
-val MidnightBackground = Color(0xFF0B1326)
-val MidnightSurface = Color(0xFF0B1326)
-val MidnightSurfaceDim = Color(0xFF0B1326)
-val MidnightSurfaceBright = Color(0xFF31394D)
-val MidnightSurfaceContainerLowest = Color(0xFF060E20)
-val MidnightSurfaceContainerLow = Color(0xFF131B2E)
-val MidnightSurfaceContainer = Color(0xFF171F33)
-val MidnightSurfaceContainerHigh = Color(0xFF222A3D)
-val MidnightSurfaceContainerHighest = Color(0xFF2D3449)
-val MidnightSurfaceVariant = Color(0xFF2D3449)
+// Base Levels & Surfaces (Dark Obsidian)
+val TrueBlack = Color(0xFF000000)
+val Charcoal = Color(0xFF121212)
+val SurfaceDark = Color(0xFF131313)
+val SurfaceGray = Color(0xFF1E1E1E)
+val SurfaceContainerLowest = Color(0xFF0E0E0E)
+val SurfaceContainerLow = Color(0xFF1C1B1B)
+val SurfaceContainer = Color(0xFF201F1F)
+val SurfaceContainerHigh = Color(0xFF2A2A2A)
+val SurfaceContainerHighest = Color(0xFF353534)
 
-// Primary Palette — Electric Violet
-val ElectricViolet = Color(0xFFD0BCFF)
-val ElectricVioletContainer = Color(0xFFA078FF)
-val ElectricVioletOnPrimary = Color(0xFF3C0091)
-val ElectricVioletOnContainer = Color(0xFF340080)
-val ElectricVioletInverse = Color(0xFF6D3BD7)
+// Primary Accent (Strava Orange & Heat Palette)
+val StravaOrange = Color(0xFFFC4C02)
+val PrimaryContainer = Color(0xFFFF571B)
+val PrimaryFixed = Color(0xFFFFDBD0)
+val PrimaryFixedDim = Color(0xFFFFB59F)
+val SurfaceTint = Color(0xFFFFB59F)
 
-// Secondary Palette — Cyan Accent
-val CyanAccent = Color(0xFF4CD7F6)
-val CyanAccentContainer = Color(0xFF03B5D3)
-val CyanOnSecondary = Color(0xFF003640)
-val CyanOnContainer = Color(0xFF00424E)
+// Text & Content Colors
+val OnSurface = Color(0xFFE5E2E1)
+val OnSurfaceVariant = Color(0xFFE6BEB2)
+val SecondaryText = Color(0xFFC6C6C7)
+val OnSecondaryContainer = Color(0xFFB4B5B5)
 
-// Tertiary Palette — Sunset Rose
-val SunsetRose = Color(0xFFFFB2B7)
-val SunsetRoseContainer = Color(0xFFFF516A)
-val SunsetRoseOnTertiary = Color(0xFF67001B)
-val SunsetRoseOnContainer = Color(0xFF5B0017)
-
-// Neutral Text & Outline Colors
-val TextOnSurface = Color(0xFFDAE2FD)
-val TextOnSurfaceVariant = Color(0xFFCBC3D7)
-val TextInverseSurface = Color(0xFFDAE2FD)
-val TextInverseOnSurface = Color(0xFF283044)
-val OutlineColor = Color(0xFF958EA0)
-val OutlineVariantColor = Color(0xFF494454)
-
-// Functional Colors
-val SuccessGreen = Color(0xFF4ADE80)
+// Highlights & System Colors
+val PRGold = Color(0xFFD4AF37)
+val SuccessGreen = Color(0xFF2DCC71)
 val ErrorRed = Color(0xFFFFB4AB)
-val OnError = Color(0xFF690005)
 val ErrorContainer = Color(0xFF93000A)
-val OnErrorContainer = Color(0xFFFFDAD6)
 
-// Glassmorphism & Liquid Tokens
-val GlassSurface = Color(0x33171F33)
-val GlassSurfaceHigh = Color(0x4D222A3D)
-val GlassBorderTopLeft = Color(0x33FFFFFF)
-val GlassBorderBottomRight = Color(0x14FFFFFF)
-val GlassBorderHighlight = Color(0x55D0BCFF)
-val GlassOverlayDark = Color(0xCC060E20)
-val GlassEtchedInput = Color(0x20000000)
-
-// Gradients
-val PrimaryGradientBrush = Brush.linearGradient(
-    colors = listOf(ElectricVioletContainer, CyanAccent)
-)
-val PrimaryGradientBrushFaded = Brush.linearGradient(
-    colors = listOf(ElectricVioletContainer.copy(alpha = 0.3f), CyanAccent.copy(alpha = 0.3f))
-)
-val SurfaceGradientBrush = Brush.verticalGradient(
-    colors = listOf(MidnightSurfaceContainerHigh.copy(alpha = 0.7f), MidnightSurfaceContainerLow.copy(alpha = 0.9f))
-)
-
-// Legacy Aliases for backward compatibility
-val NavyDeep = MidnightBackground
-val NavySurface = MidnightSurfaceContainer
-val NavySurfaceVariant = MidnightSurfaceContainerHighest
-val OrangeAccent = ElectricVioletContainer
-val OrangeAccentLight = CyanAccent
-val OrangeAccentDark = ElectricViolet
-val TextPrimaryLight = TextOnSurface
-val TextSecondaryLight = TextOnSurfaceVariant
-val TextPrimaryDark = MidnightBackground
-val TextSecondaryDark = OutlineColor
+// Glassmorphism Token Constants
+val GlassBorder = Color(0x1AE5E2E1) // White with 10% opacity
+val GlassBackground = Color(0x80121212) // Charcoal with 50% opacity
+val EtchedInputBackground = Color(0x4D000000) // 30% black

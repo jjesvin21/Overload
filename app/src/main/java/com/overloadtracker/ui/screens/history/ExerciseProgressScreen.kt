@@ -1,47 +1,40 @@
 /**
  * Exercise progress chart showing max weight over time.
- * Refactored with Liquid Glass / Liquid Vitality visual aesthetic.
+ * Styled with Liquid Glass specification.
  */
 package com.overloadtracker.ui.screens.history
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ShowChart
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.overloadtracker.R
 import com.overloadtracker.data.model.ExerciseProgressPoint
-import com.overloadtracker.ui.components.LiquidGlassCard
-import com.overloadtracker.ui.components.LiquidMetricCard
-import com.overloadtracker.ui.components.LiquidTopAppBar
-import com.overloadtracker.ui.theme.CyanAccent
-import com.overloadtracker.ui.theme.ElectricViolet
-import com.overloadtracker.ui.theme.MidnightBackground
-import com.overloadtracker.ui.theme.TextOnSurfaceVariant
-import com.overloadtracker.util.WeightUnit
-import com.overloadtracker.util.WeightUtils
+import com.overloadtracker.ui.components.GlassCard
+import com.overloadtracker.ui.theme.HeadlineLargeMobile
+import com.overloadtracker.ui.theme.OnSurface
+import com.overloadtracker.ui.theme.OnSurfaceVariant
+import com.overloadtracker.ui.theme.StravaOrange
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
@@ -51,7 +44,7 @@ import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 
 /**
- * Line chart of max weight per session for one exercise in Liquid Glass style.
+ * Line chart of max weight per session for one exercise.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,17 +56,18 @@ fun ExerciseProgressScreen(
     val progress by viewModel.progress.collectAsState()
     val exerciseName by viewModel.exerciseName.collectAsState()
 
-    val maxWeightEver = progress.maxOfOrNull { it.maxWeight } ?: 0.0
-    val lastWeight = progress.lastOrNull()?.maxWeight ?: 0.0
-
     Scaffold(
-        modifier = modifier.background(MidnightBackground),
-        containerColor = MidnightBackground,
+        modifier = modifier,
+        containerColor = Color.Transparent,
         topBar = {
-            LiquidTopAppBar(
-                title = exerciseName.orEmpty().ifEmpty { "EXERCISE PROGRESS" },
-                subtitle = "PROGRESSION ANALYTICS",
-                onBackClick = onBack
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                title = { Text(exerciseName ?: "Progress", style = HeadlineLargeMobile, color = StravaOrange) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = OnSurfaceVariant)
+                    }
+                }
             )
         }
     ) { padding ->
@@ -81,57 +75,32 @@ fun ExerciseProgressScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(20.dp)
         ) {
             if (progress.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                GlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
                         text = "No logged sets yet for this exercise.",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = TextOnSurfaceVariant
+                        color = OnSurfaceVariant,
+                        modifier = Modifier.padding(24.dp)
                     )
                 }
             } else {
-                Row(
+                GlassCard(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    shape = RoundedCornerShape(20.dp),
+                    hasGlow = true
                 ) {
-                    LiquidMetricCard(
-                        label = "ALL-TIME PEAK",
-                        value = WeightUtils.formatWeight(maxWeightEver, WeightUnit.KG),
-                        icon = Icons.AutoMirrored.Filled.TrendingUp,
-                        accentColor = ElectricViolet,
-                        modifier = Modifier.weight(1f)
-                    )
-                    LiquidMetricCard(
-                        label = "LATEST BEST",
-                        value = WeightUtils.formatWeight(lastWeight, WeightUnit.KG),
-                        icon = Icons.AutoMirrored.Filled.ShowChart,
-                        accentColor = CyanAccent,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                LiquidGlassCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    padding = 16.dp
-                ) {
-                    Text(
-                        text = "MAX WEIGHT OVER TIME",
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                        color = TextOnSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
-
                     ProgressChart(
                         points = progress,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(280.dp)
+                            .padding(16.dp)
                     )
                 }
             }

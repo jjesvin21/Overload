@@ -1,12 +1,13 @@
 /**
  * Detailed view of a single workout session with PR badges and CSV export.
- * Refactored with Liquid Glass / Liquid Vitality visual aesthetic.
+ * Styled to Liquid Glass specification.
  */
 package com.overloadtracker.ui.screens.history
 
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,19 +17,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -52,23 +61,18 @@ import com.overloadtracker.R
 import com.overloadtracker.data.local.entity.SessionSet
 import com.overloadtracker.data.local.entity.SessionWithSets
 import com.overloadtracker.data.repository.WorkoutSessionRepository
-import com.overloadtracker.ui.components.LiquidGlassCard
-import com.overloadtracker.ui.components.LiquidMetricCard
-import com.overloadtracker.ui.components.LiquidPrimaryButton
-import com.overloadtracker.ui.components.LiquidTopAppBar
+import com.overloadtracker.ui.components.GlassCard
 import com.overloadtracker.ui.navigation.SessionDetailRoute
-import com.overloadtracker.ui.theme.CyanAccent
-import com.overloadtracker.ui.theme.ElectricViolet
-import com.overloadtracker.ui.theme.GlassBorderHighlight
-import com.overloadtracker.ui.theme.GlassBorderTopLeft
-import com.overloadtracker.ui.theme.GlassSurfaceHigh
+import com.overloadtracker.ui.theme.GlassBorder
+import com.overloadtracker.ui.theme.HeadlineLargeMobile
 import com.overloadtracker.ui.theme.LabelCaps
-import com.overloadtracker.ui.theme.MidnightBackground
-import com.overloadtracker.ui.theme.NumericData
-import com.overloadtracker.ui.theme.ShapeChip
-import com.overloadtracker.ui.theme.SunsetRose
-import com.overloadtracker.ui.theme.TextOnSurface
-import com.overloadtracker.ui.theme.TextOnSurfaceVariant
+import com.overloadtracker.ui.theme.OnSurface
+import com.overloadtracker.ui.theme.OnSurfaceVariant
+import com.overloadtracker.ui.theme.PRGold
+import com.overloadtracker.ui.theme.SecondaryText
+import com.overloadtracker.ui.theme.StravaOrange
+import com.overloadtracker.ui.theme.SurfaceContainerHighest
+import com.overloadtracker.ui.theme.TrueBlack
 import com.overloadtracker.util.CsvExporter
 import com.overloadtracker.util.WeightUnit
 import com.overloadtracker.util.WeightUtils
@@ -113,7 +117,7 @@ class SessionDetailViewModel @Inject constructor(
 }
 
 /**
- * Session detail with sets table and single-session CSV export in Liquid Glass style.
+ * Session detail with sets table and single-session CSV export.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -139,27 +143,61 @@ fun SessionDetailScreen(
     }
 
     Scaffold(
-        modifier = modifier.background(MidnightBackground),
-        containerColor = MidnightBackground,
+        modifier = modifier,
+        containerColor = Color.Transparent,
         topBar = {
-            LiquidTopAppBar(
-                title = session?.session?.groupName.orEmpty().ifEmpty { "SESSION SUMMARY" },
-                subtitle = "DETAILED METRICS & LOGS",
-                onBackClick = onBack,
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                title = {
+                    Text(
+                        session?.session?.groupName.orEmpty(),
+                        style = HeadlineLargeMobile,
+                        color = OnSurface
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = OnSurfaceVariant
+                        )
+                    }
+                },
                 actions = {
-                    LiquidPrimaryButton(
-                        text = stringResource(R.string.export_session),
-                        onClick = {
-                            viewModel.exportSession { success ->
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        if (success) exportedMessage else "Export failed"
-                                    )
+                    Box(
+                        modifier = Modifier
+                            .padding(end = 12.dp)
+                            .clip(CircleShape)
+                            .background(SurfaceContainerHighest)
+                            .border(1.dp, GlassBorder, CircleShape)
+                            .clickable {
+                                viewModel.exportSession { success ->
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            if (success) exportedMessage else "Export failed"
+                                        )
+                                    }
                                 }
                             }
-                        },
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
+                            .padding(horizontal = 14.dp, vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Download,
+                                contentDescription = null,
+                                tint = StravaOrange,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(R.string.export_session),
+                                style = LabelCaps.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold),
+                                color = OnSurface
+                            )
+                        }
+                    }
                 }
             )
         },
@@ -171,43 +209,57 @@ fun SessionDetailScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 item {
-                    Row(
+                    GlassCard(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        shape = RoundedCornerShape(18.dp)
                     ) {
-                        LiquidMetricCard(
-                            label = stringResource(R.string.duration),
-                            value = formatDuration(sws.session.endTime - sws.session.startTime),
-                            icon = Icons.Default.Timer,
-                            accentColor = ElectricViolet,
-                            modifier = Modifier.weight(1f)
-                        )
-                        LiquidMetricCard(
-                            label = stringResource(R.string.total_volume),
-                            value = WeightUtils.formatWeight(sws.session.totalVolume, WeightUnit.KG),
-                            icon = Icons.Default.Speed,
-                            accentColor = CyanAccent,
-                            modifier = Modifier.weight(1f)
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(18.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text("DURATION", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText)
+                                Text(
+                                    formatDuration(sws.session.endTime - sws.session.startTime),
+                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = OnSurface
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text("TOTAL VOLUME", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText)
+                                Text(
+                                    WeightUtils.formatWeight(sws.session.totalVolume, WeightUnit.KG),
+                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = StravaOrange
+                                )
+                            }
+                        }
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
                 }
+
                 grouped.forEach { (name, sets) ->
                     item(key = "header-$name") {
                         Text(
-                            text = name.uppercase(),
-                            style = LabelCaps.copy(fontSize = 13.sp, fontWeight = FontWeight.Bold),
-                            color = CyanAccent,
-                            modifier = Modifier.padding(vertical = 4.dp)
+                            text = name,
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = OnSurface,
+                            modifier = Modifier.padding(top = 8.dp)
                         )
                     }
                     items(sets, key = { it.id }) { set ->
                         SetDetailRow(set = set, isPr = set.id in prSets)
                     }
+                }
+
+                item {
+                    Spacer(Modifier.height(40.dp))
                 }
             }
         }
@@ -216,56 +268,53 @@ fun SessionDetailScreen(
 
 @Composable
 private fun SetDetailRow(set: SessionSet, isPr: Boolean) {
-    LiquidGlassCard(
+    GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        highlightBorder = isPr,
-        padding = 12.dp
+        shape = RoundedCornerShape(14.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
                 Text(
-                    text = "SET ${set.setNumber}".uppercase(),
+                    text = "${stringResource(R.string.set_number)} ${set.setNumber}",
                     style = LabelCaps.copy(fontSize = 11.sp),
-                    color = TextOnSurfaceVariant
+                    color = SecondaryText
                 )
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = "${WeightUtils.formatWeight(set.weight, WeightUnit.KG)} × ${set.reps}",
-                    style = NumericData.copy(fontSize = 20.sp, fontWeight = FontWeight.Bold),
-                    color = TextOnSurface
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = OnSurface
                 )
                 set.rpe?.let {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "RPE $it",
-                        style = LabelCaps.copy(fontSize = 10.sp),
-                        color = ElectricViolet
-                    )
+                    Text("RPE $it", style = LabelCaps.copy(fontSize = 10.sp), color = StravaOrange)
                 }
             }
             if (isPr) {
                 Box(
                     modifier = Modifier
-                        .clip(ShapeChip)
-                        .background(SunsetRose.copy(alpha = 0.2f))
-                        .border(width = 1.dp, color = SunsetRose, shape = ShapeChip)
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                        .clip(CircleShape)
+                        .background(PRGold.copy(alpha = 0.2f))
+                        .border(1.dp, PRGold, CircleShape)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.EmojiEvents,
                             contentDescription = null,
-                            tint = SunsetRose,
-                            modifier = Modifier.padding(end = 4.dp)
+                            tint = PRGold,
+                            modifier = Modifier.size(14.dp)
                         )
+                        Spacer(Modifier.width(4.dp))
                         Text(
-                            text = stringResource(R.string.pr_badge).uppercase(),
+                            text = stringResource(R.string.pr_badge),
                             style = LabelCaps.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
-                            color = SunsetRose
+                            color = PRGold
                         )
                     }
                 }

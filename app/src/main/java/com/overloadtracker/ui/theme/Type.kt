@@ -1,6 +1,6 @@
 /**
- * Typography scale for Overload Tracker — Liquid Glass design system.
- * Uses Inter for clean body & high-impact numbers, JetBrains Mono for HUD labels & metadata.
+ * Typography scale for Overload Tracker matching Apex Athletic Liquid Glass spec.
+ * Uses Inter font family for metrics/headlines/body and Monospace (JetBrains Mono) for Label Caps.
  */
 package com.overloadtracker.ui.theme
 
@@ -10,13 +10,20 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Typography Extensions for Liquid Glass HUD & Workout Metrics
 val DisplayMetrics = TextStyle(
     fontFamily = FontFamily.SansSerif,
     fontWeight = FontWeight.ExtraBold,
     fontSize = 48.sp,
     lineHeight = 52.sp,
     letterSpacing = (-0.04).sp
+)
+
+val HeadlineLargeMobile = TextStyle(
+    fontFamily = FontFamily.SansSerif,
+    fontWeight = FontWeight.Bold,
+    fontSize = 28.sp,
+    lineHeight = 34.sp,
+    letterSpacing = (-0.02).sp
 )
 
 val LabelCaps = TextStyle(
@@ -41,7 +48,7 @@ val AppTypography = Typography(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Bold,
         fontSize = 36.sp,
-        lineHeight = 44.sp,
+        lineHeight = 42.sp,
         letterSpacing = (-0.03).sp
     ),
     headlineLarge = TextStyle(
@@ -57,23 +64,17 @@ val AppTypography = Typography(
         fontSize = 24.sp,
         lineHeight = 32.sp
     ),
-    headlineSmall = TextStyle(
+    titleLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
         lineHeight = 26.sp
     ),
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp,
-        lineHeight = 24.sp
-    ),
     titleMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 16.sp,
-        lineHeight = 22.sp
+        lineHeight = 24.sp
     ),
     titleSmall = TextStyle(
         fontFamily = FontFamily.SansSerif,
@@ -109,9 +110,9 @@ val AppTypography = Typography(
     labelMedium = LabelCaps,
     labelSmall = TextStyle(
         fontFamily = FontFamily.Monospace,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 10.sp,
         lineHeight = 14.sp,
-        letterSpacing = 1.0.sp
+        letterSpacing = 0.8.sp
     )
 )

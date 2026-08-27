@@ -1,16 +1,15 @@
 /**
- * Active workout screen with expandable exercises, sets, and rest timer.
- * Refactored with Liquid Glass / Liquid Vitality visual aesthetic.
+ * Active workout screen with expandable exercises, set logging, rest timer, and Liquid Glass design.
  */
 package com.overloadtracker.ui.screens.workout
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,20 +18,32 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -43,6 +54,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -50,32 +62,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.overloadtracker.R
-import com.overloadtracker.ui.components.LiquidAlertDialog
-import com.overloadtracker.ui.components.LiquidBottomSheet
-import com.overloadtracker.ui.components.LiquidGlassCard
-import com.overloadtracker.ui.components.LiquidIconButton
-import com.overloadtracker.ui.components.LiquidPrimaryButton
-import com.overloadtracker.ui.components.LiquidSecondaryButton
-import com.overloadtracker.ui.components.LiquidTopAppBar
+import com.overloadtracker.ui.components.GlassCard
 import com.overloadtracker.ui.components.RestTimer
 import com.overloadtracker.ui.components.SetRow
 import com.overloadtracker.ui.screens.library.ExerciseLibraryScreen
-import com.overloadtracker.ui.theme.CyanAccent
-import com.overloadtracker.ui.theme.ElectricVioletOnPrimary
-import com.overloadtracker.ui.theme.GlassBorderTopLeft
-import com.overloadtracker.ui.theme.GlassSurfaceHigh
+import com.overloadtracker.ui.theme.Charcoal
+import com.overloadtracker.ui.theme.GlassBorder
+import com.overloadtracker.ui.theme.HeadlineLargeMobile
 import com.overloadtracker.ui.theme.LabelCaps
-import com.overloadtracker.ui.theme.MidnightBackground
-import com.overloadtracker.ui.theme.PrimaryGradientBrush
-import com.overloadtracker.ui.theme.ShapeChip
-import com.overloadtracker.ui.theme.ShapePill
-import com.overloadtracker.ui.theme.TextOnSurface
-import com.overloadtracker.ui.theme.TextOnSurfaceVariant
+import com.overloadtracker.ui.theme.OnSurface
+import com.overloadtracker.ui.theme.OnSurfaceVariant
+import com.overloadtracker.ui.theme.SecondaryText
+import com.overloadtracker.ui.theme.StravaOrange
+import com.overloadtracker.ui.theme.SurfaceContainerHighest
+import com.overloadtracker.ui.theme.TrueBlack
 import com.overloadtracker.util.formatDuration
 
-/**
- * Live workout logging screen in Liquid Glass style.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LiveWorkoutScreen(
@@ -105,19 +107,56 @@ fun LiveWorkoutScreen(
         onResetRest = viewModel::resetRest
     ) {
         Scaffold(
-            modifier = modifier.background(MidnightBackground),
-            containerColor = MidnightBackground,
+            modifier = modifier,
+            containerColor = Color.Transparent,
             topBar = {
-                LiquidTopAppBar(
-                    title = uiState.groupName.ifEmpty { "ACTIVE WORKOUT" },
-                    subtitle = formatDuration(uiState.elapsedMillis),
-                    onBackClick = { showDiscardDialog = true },
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = OnSurface
+                    ),
+                    title = {
+                        Column {
+                            Text(
+                                text = uiState.groupName.uppercase(),
+                                style = LabelCaps.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold),
+                                color = StravaOrange
+                            )
+                            Text(
+                                text = formatDuration(uiState.elapsedMillis),
+                                style = HeadlineLargeMobile,
+                                color = OnSurface
+                            )
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { showDiscardDialog = true }) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = OnSurfaceVariant
+                            )
+                        }
+                    },
                     actions = {
-                        LiquidPrimaryButton(
-                            text = stringResource(R.string.finish_workout),
-                            onClick = { viewModel.finishWorkout { onFinish() } },
-                            enabled = !uiState.isFinishing
-                        )
+                        Box(
+                            modifier = Modifier
+                                .padding(end = 12.dp)
+                                .shadow(8.dp, CircleShape, spotColor = StravaOrange)
+                                .clip(CircleShape)
+                                .background(StravaOrange)
+                                .clickable(enabled = !uiState.isFinishing) {
+                                    viewModel.finishWorkout { onFinish() }
+                                }
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.finish_workout),
+                                style = LabelCaps.copy(fontWeight = FontWeight.Bold),
+                                color = TrueBlack
+                            )
+                        }
                     }
                 )
             },
@@ -125,10 +164,10 @@ fun LiveWorkoutScreen(
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = { showAddExercise = true },
-                    containerColor = Color.Transparent,
-                    contentColor = ElectricVioletOnPrimary,
-                    shape = ShapePill,
-                    modifier = Modifier.background(PrimaryGradientBrush, shape = ShapePill)
+                    containerColor = StravaOrange,
+                    contentColor = Color.White,
+                    shape = CircleShape,
+                    modifier = Modifier.shadow(12.dp, CircleShape, spotColor = StravaOrange)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_exercises))
                 }
@@ -137,9 +176,9 @@ fun LiveWorkoutScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
-                contentPadding = PaddingValues(16.dp)
+                    .padding(padding)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(uiState.exercises, key = { it.exerciseId }) { exercise ->
                     ExerciseSection(
@@ -160,22 +199,35 @@ fun LiveWorkoutScreen(
                         onAddSet = { viewModel.addSet(exercise.exerciseId) }
                     )
                 }
+
+                item {
+                    Spacer(Modifier.height(40.dp))
+                }
             }
         }
     }
 
     if (showDiscardDialog) {
-        LiquidAlertDialog(
+        AlertDialog(
             onDismissRequest = { showDiscardDialog = false },
-            title = stringResource(R.string.discard_confirm_title),
-            bodyText = stringResource(R.string.discard_confirm_body),
-            confirmButtonText = stringResource(R.string.confirm),
-            onConfirm = {
-                showDiscardDialog = false
-                onDiscard()
+            containerColor = Charcoal,
+            titleContentColor = OnSurface,
+            textContentColor = OnSurfaceVariant,
+            title = { Text(stringResource(R.string.discard_confirm_title)) },
+            text = { Text(stringResource(R.string.discard_confirm_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDiscardDialog = false
+                    onDiscard()
+                }) {
+                    Text(stringResource(R.string.confirm), color = StravaOrange)
+                }
             },
-            dismissButtonText = stringResource(R.string.cancel),
-            onDismiss = { showDiscardDialog = false }
+            dismissButton = {
+                TextButton(onClick = { showDiscardDialog = false }) {
+                    Text(stringResource(R.string.cancel), color = OnSurfaceVariant)
+                }
+            }
         )
     }
 
@@ -201,7 +253,10 @@ private fun AddExerciseBottomSheet(
     onSelect: (com.overloadtracker.data.local.entity.Exercise) -> Unit,
     onViewProgress: (String) -> Unit
 ) {
-    LiquidBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = Charcoal
+    ) {
         ExerciseLibraryScreen(
             onViewProgress = onViewProgress,
             onExerciseSelected = onSelect,
@@ -243,68 +298,118 @@ private fun ExerciseSection(
     onCompleteChange: (Int, Boolean) -> Unit,
     onAddSet: () -> Unit
 ) {
-    LiquidGlassCard(
+    GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        padding = 16.dp
+        shape = RoundedCornerShape(18.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = exercise.exerciseName,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = TextOnSurface
-                )
-                exercise.prevBestLabel?.let { label ->
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Box(
-                        modifier = Modifier
-                            .clip(ShapeChip)
-                            .background(GlassSurfaceHigh)
-                            .border(width = 1.dp, color = GlassBorderTopLeft, shape = ShapeChip)
-                            .padding(horizontal = 8.dp, vertical = 3.dp)
-                    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Exercise Header Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(SurfaceContainerHighest),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FitnessCenter,
+                        contentDescription = null,
+                        tint = StravaOrange,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = exercise.exerciseName,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = OnSurface
+                    )
+                    exercise.prevBestLabel?.let { label ->
                         Text(
-                            text = "PREV: $label".uppercase(),
+                            text = "PREV BEST: $label",
                             style = LabelCaps.copy(fontSize = 10.sp),
-                            color = CyanAccent
+                            color = StravaOrange
                         )
                     }
                 }
-            }
-            LiquidIconButton(
-                icon = if (exercise.expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                contentDescription = "Expand/Collapse",
-                onClick = onToggleExpand
-            )
-        }
-        AnimatedVisibility(visible = exercise.expanded) {
-            Column(
-                modifier = Modifier.padding(top = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                exercise.sets.forEach { set ->
-                    SetRow(
-                        setNumber = set.setNumber,
-                        weightDisplay = set.weightDisplay,
-                        repsDisplay = set.repsDisplay,
-                        rpe = set.rpe,
-                        isCompleted = set.isCompleted,
-                        prevWeightDisplay = set.prevWeightDisplay,
-                        onWeightChange = { onWeightChange(set.setNumber, it) },
-                        onRepsChange = { onRepsChange(set.setNumber, it) },
-                        onRpeChange = { onRpeChange(set.setNumber, it) },
-                        onCompletedChange = { onCompleteChange(set.setNumber, it) }
+                IconButton(onClick = onToggleExpand) {
+                    Icon(
+                        imageVector = if (exercise.expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        tint = OnSurfaceVariant
                     )
                 }
-                Spacer(modifier = Modifier.height(4.dp))
-                LiquidSecondaryButton(
-                    text = stringResource(R.string.add_set),
-                    onClick = onAddSet,
-                    modifier = Modifier.fillMaxWidth()
-                )
+            }
+
+            AnimatedVisibility(visible = exercise.expanded) {
+                Column(
+                    modifier = Modifier.padding(top = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    // Set Table Column Header Labels
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text("SET", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.width(28.dp))
+                        Text("WEIGHT", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(1f))
+                        Text("REPS", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(0.9f))
+                        Text("RPE", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(0.7f))
+                        Text("", modifier = Modifier.size(36.dp))
+                    }
+
+                    // Set Rows List
+                    exercise.sets.forEach { set ->
+                        SetRow(
+                            setNumber = set.setNumber,
+                            weightDisplay = set.weightDisplay,
+                            repsDisplay = set.repsDisplay,
+                            rpe = set.rpe,
+                            isCompleted = set.isCompleted,
+                            onWeightChange = { onWeightChange(set.setNumber, it) },
+                            onRepsChange = { onRepsChange(set.setNumber, it) },
+                            onRpeChange = { onRpeChange(set.setNumber, it) },
+                            onCompletedChange = { onCompleteChange(set.setNumber, it) }
+                        )
+                    }
+
+                    Spacer(Modifier.height(4.dp))
+
+                    // Add Set Pill Action
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(SurfaceContainerHighest)
+                            .border(1.dp, GlassBorder, RoundedCornerShape(12.dp))
+                            .clickable(onClick = onAddSet),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                tint = StravaOrange,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(R.string.add_set),
+                                style = LabelCaps.copy(fontWeight = FontWeight.Bold),
+                                color = StravaOrange
+                            )
+                        }
+                    }
+                }
             }
         }
     }
