@@ -1,8 +1,10 @@
 /**
  * Edit workout group: rename, reorder exercises, remove, and add more.
+ * Styled with Liquid Glass design.
  */
 package com.overloadtracker.ui.screens.groups
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,21 +14,25 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,7 +42,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -46,7 +55,14 @@ import com.overloadtracker.R
 import com.overloadtracker.data.local.entity.GroupExerciseCrossRef
 import com.overloadtracker.data.local.entity.WorkoutGroup
 import com.overloadtracker.data.repository.WorkoutGroupRepository
+import com.overloadtracker.ui.components.GlassCard
 import com.overloadtracker.ui.navigation.GroupEditorRoute
+import com.overloadtracker.ui.theme.Charcoal
+import com.overloadtracker.ui.theme.GlassBorder
+import com.overloadtracker.ui.theme.HeadlineLargeMobile
+import com.overloadtracker.ui.theme.OnSurface
+import com.overloadtracker.ui.theme.OnSurfaceVariant
+import com.overloadtracker.ui.theme.StravaOrange
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -138,19 +154,35 @@ fun GroupEditorScreen(
 
     Scaffold(
         modifier = modifier,
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.edit_group)) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                title = {
+                    Text(
+                        stringResource(R.string.edit_group),
+                        style = HeadlineLargeMobile,
+                        color = OnSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = OnSurfaceVariant
+                        )
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { group?.let { onAddExercises(it.id) } }
+                onClick = { group?.let { onAddExercises(it.id) } },
+                containerColor = StravaOrange,
+                contentColor = Color.White,
+                shape = CircleShape,
+                modifier = Modifier.shadow(12.dp, CircleShape, spotColor = StravaOrange)
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_exercises))
             }
@@ -160,25 +192,46 @@ fun GroupEditorScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text(stringResource(R.string.group_name)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = { Text(stringResource(R.string.group_name), color = OnSurfaceVariant) },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Charcoal,
+                    unfocusedContainerColor = Charcoal,
+                    focusedBorderColor = StravaOrange,
+                    unfocusedBorderColor = GlassBorder,
+                    focusedTextColor = OnSurface,
+                    unfocusedTextColor = OnSurface
+                ),
+                modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
-                label = { Text(stringResource(R.string.notes_optional)) },
+                label = { Text(stringResource(R.string.notes_optional), color = OnSurfaceVariant) },
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Charcoal,
+                    unfocusedContainerColor = Charcoal,
+                    focusedBorderColor = StravaOrange,
+                    unfocusedBorderColor = GlassBorder,
+                    focusedTextColor = OnSurface,
+                    unfocusedTextColor = OnSurface
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 itemsIndexed(exercises, key = { _, item -> item.exercise.id }) { index, item ->
-                    Card(modifier = Modifier.fillMaxWidth()) {
+                    GlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -188,22 +241,36 @@ fun GroupEditorScreen(
                         ) {
                             Text(
                                 text = item.exercise.name,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = OnSurface,
                                 modifier = Modifier.weight(1f)
                             )
                             IconButton(
                                 onClick = { viewModel.moveUp(index, exercises) },
                                 enabled = index > 0
                             ) {
-                                Icon(Icons.Default.ArrowUpward, contentDescription = "Move up")
+                                Icon(
+                                    Icons.Default.ArrowUpward,
+                                    contentDescription = "Move up",
+                                    tint = if (index > 0) StravaOrange else OnSurfaceVariant.copy(alpha = 0.3f)
+                                )
                             }
                             IconButton(
                                 onClick = { viewModel.moveDown(index, exercises) },
                                 enabled = index < exercises.lastIndex
                             ) {
-                                Icon(Icons.Default.ArrowDownward, contentDescription = "Move down")
+                                Icon(
+                                    Icons.Default.ArrowDownward,
+                                    contentDescription = "Move down",
+                                    tint = if (index < exercises.lastIndex) StravaOrange else OnSurfaceVariant.copy(alpha = 0.3f)
+                                )
                             }
                             IconButton(onClick = { viewModel.removeExercise(item.exercise.id) }) {
-                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = stringResource(R.string.delete),
+                                    tint = MaterialTheme.colorScheme.error
+                                )
                             }
                         }
                     }

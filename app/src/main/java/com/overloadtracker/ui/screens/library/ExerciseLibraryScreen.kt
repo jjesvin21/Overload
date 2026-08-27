@@ -1,28 +1,40 @@
 /**
- * Searchable exercise library with filters and detail sheet.
+ * Searchable exercise library with Liquid Glass filters, dark search bar, and grid.
  */
 package com.overloadtracker.ui.screens.library
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,27 +43,34 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.overloadtracker.R
+import com.overloadtracker.data.local.entity.Exercise
+import com.overloadtracker.data.local.entity.WorkoutGroup
 import com.overloadtracker.ui.components.ExerciseCard
 import com.overloadtracker.ui.components.ExerciseDetailSheet
 import com.overloadtracker.ui.components.FilterChips
+import com.overloadtracker.ui.theme.Charcoal
+import com.overloadtracker.ui.theme.GlassBorder
+import com.overloadtracker.ui.theme.HeadlineLargeMobile
+import com.overloadtracker.ui.theme.OnSurface
+import com.overloadtracker.ui.theme.OnSurfaceVariant
+import com.overloadtracker.ui.theme.StravaOrange
+import com.overloadtracker.ui.theme.SurfaceContainerHighest
 import com.overloadtracker.ui.viewmodel.SharedExerciseViewModel
-import com.overloadtracker.data.local.entity.Exercise
-import com.overloadtracker.data.local.entity.WorkoutGroup
 import com.overloadtracker.util.titleCase
 
-/**
- * Exercise catalog with debounced search, category chips, and equipment filter.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseLibraryScreen(
     onViewProgress: (String) -> Unit,
     modifier: Modifier = Modifier,
-    onExerciseSelected: ((com.overloadtracker.data.local.entity.Exercise) -> Unit)? = null,
+    onExerciseSelected: ((Exercise) -> Unit)? = null,
     viewModel: ExerciseLibraryViewModel = hiltViewModel(),
     sharedExerciseViewModel: SharedExerciseViewModel = hiltViewModel()
 ) {
@@ -60,26 +79,76 @@ fun ExerciseLibraryScreen(
     val groups by viewModel.groups.collectAsState()
     var exerciseToAdd by remember { mutableStateOf<Exercise?>(null) }
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Transparent)
+    ) {
+        if (onExerciseSelected == null) {
+            Spacer(Modifier.height(12.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Library",
+                    style = HeadlineLargeMobile,
+                    color = StravaOrange
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+        }
+
+        // Search Input Field
         OutlinedTextField(
             value = uiState.query,
             onValueChange = viewModel::setQuery,
-            label = { Text(stringResource(R.string.search_exercises)) },
+            placeholder = { Text(stringResource(R.string.search_exercises), color = OnSurfaceVariant) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    tint = StravaOrange
+                )
+            },
+            trailingIcon = {
+                if (uiState.query.isNotEmpty()) {
+                    IconButton(onClick = { viewModel.setQuery("") }) {
+                        Icon(Icons.Default.Close, contentDescription = "Clear", tint = OnSurfaceVariant)
+                    }
+                }
+            },
+            singleLine = true,
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Charcoal,
+                unfocusedContainerColor = Charcoal,
+                focusedBorderColor = StravaOrange,
+                unfocusedBorderColor = GlassBorder,
+                focusedTextColor = OnSurface,
+                unfocusedTextColor = OnSurface
+            ),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            singleLine = true
+                .padding(horizontal = 16.dp, vertical = 6.dp)
         )
+
+        // Filter Category Chips
         FilterChips(
             selectedCategories = uiState.selectedCategories,
             onToggle = viewModel::toggleCategory
         )
+
+        // Equipment Dropdown Filter
         EquipmentDropdown(
             options = uiState.equipmentOptions,
             selected = uiState.selectedEquipment,
             onSelected = viewModel::setEquipment,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
         )
+
         when {
             uiState.isLoading -> {
                 Box(
@@ -87,11 +156,12 @@ fun ExerciseLibraryScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = StravaOrange)
                         Text(
                             text = stringResource(R.string.loading),
                             modifier = Modifier.padding(top = 12.dp),
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = OnSurfaceVariant
                         )
                     }
                 }
@@ -104,13 +174,13 @@ fun ExerciseLibraryScreen(
                     Text(
                         text = stringResource(R.string.no_exercises_match),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = OnSurfaceVariant
                     )
                 }
             }
             else -> {
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 280.dp),
+                    columns = GridCells.Adaptive(minSize = 160.dp),
                     contentPadding = PaddingValues(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -168,6 +238,9 @@ private fun AddExerciseToGroupDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Charcoal,
+        titleContentColor = OnSurface,
+        textContentColor = OnSurfaceVariant,
         title = { Text(stringResource(R.string.add_exercise_to_group, exercise.name)) },
         text = {
             if (groups.isEmpty()) {
@@ -179,7 +252,7 @@ private fun AddExerciseToGroupDialog(
                             onClick = { onSelectGroup(group.id) },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(group.name)
+                            Text(group.name, color = StravaOrange)
                         }
                     }
                 }
@@ -187,7 +260,7 @@ private fun AddExerciseToGroupDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
+                Text(stringResource(R.string.cancel), color = OnSurfaceVariant)
             }
         }
     )
@@ -211,15 +284,28 @@ private fun EquipmentDropdown(
             value = selected?.let { titleCase(it) } ?: stringResource(R.string.all_equipment),
             onValueChange = {},
             readOnly = true,
-            label = { Text(stringResource(R.string.equipment_filter)) },
+            label = { Text(stringResource(R.string.equipment_filter), color = OnSurfaceVariant) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Charcoal,
+                unfocusedContainerColor = Charcoal,
+                focusedBorderColor = StravaOrange,
+                unfocusedBorderColor = GlassBorder,
+                focusedTextColor = OnSurface,
+                unfocusedTextColor = OnSurface
+            ),
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth()
         )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.background(SurfaceContainerHighest)
+        ) {
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.all_equipment)) },
+                text = { Text(stringResource(R.string.all_equipment), color = OnSurface) },
                 onClick = {
                     onSelected(null)
                     expanded = false
@@ -227,7 +313,7 @@ private fun EquipmentDropdown(
             )
             options.forEach { equipment ->
                 DropdownMenuItem(
-                    text = { Text(titleCase(equipment)) },
+                    text = { Text(titleCase(equipment), color = OnSurface) },
                     onClick = {
                         onSelected(equipment)
                         expanded = false

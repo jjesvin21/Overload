@@ -1,29 +1,43 @@
 /**
- * Multi-select exercise picker to add exercises to a workout group.
+ * Multi-select exercise picker to add exercises to a workout group styled with Liquid Glass design.
  */
 package com.overloadtracker.ui.screens.groups
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,8 +46,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -43,8 +62,19 @@ import com.overloadtracker.data.local.entity.Exercise
 import com.overloadtracker.data.repository.ExerciseRepository
 import com.overloadtracker.data.repository.WorkoutGroupRepository
 import com.overloadtracker.ui.components.FilterChips
+import com.overloadtracker.ui.components.GlassCard
 import com.overloadtracker.ui.navigation.AddExercisesRoute
+import com.overloadtracker.ui.theme.Charcoal
+import com.overloadtracker.ui.theme.GlassBorder
+import com.overloadtracker.ui.theme.HeadlineLargeMobile
+import com.overloadtracker.ui.theme.LabelCaps
+import com.overloadtracker.ui.theme.OnSurface
+import com.overloadtracker.ui.theme.OnSurfaceVariant
+import com.overloadtracker.ui.theme.StravaOrange
+import com.overloadtracker.ui.theme.SurfaceContainerHighest
+import com.overloadtracker.ui.theme.TrueBlack
 import com.overloadtracker.util.Constants
+import com.overloadtracker.util.titleCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -110,7 +140,7 @@ class AddExercisesViewModel @Inject constructor(
 }
 
 /**
- * Multi-select library screen with bottom bar confirmation.
+ * Multi-select library screen with bottom bar confirmation styled to Liquid Glass spec.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,87 +157,154 @@ fun AddExercisesToGroupScreen(
 
     Scaffold(
         modifier = modifier,
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.add_exercises)) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                title = {
+                    Text(
+                        stringResource(R.string.add_exercises),
+                        style = HeadlineLargeMobile,
+                        color = OnSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = OnSurfaceVariant
+                        )
                     }
                 }
             )
         },
         bottomBar = {
-            Button(
-                onClick = { viewModel.addSelected(onAdded) },
-                enabled = selected.isNotEmpty(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .heightIn(min = 48.dp)
-            ) {
-                Text(stringResource(R.string.add_selected, selected.size))
+            if (selected.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(54.dp)
+                            .shadow(12.dp, CircleShape, spotColor = StravaOrange)
+                            .clip(CircleShape)
+                            .background(StravaOrange)
+                            .clickable { viewModel.addSelected(onAdded) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.add_selected, selected.size),
+                            style = LabelCaps.copy(fontSize = 13.sp, fontWeight = FontWeight.Bold),
+                            color = TrueBlack
+                        )
+                    }
+                }
             }
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 280.dp),
-                contentPadding = PaddingValues(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 160.dp),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = query,
                         onValueChange = {
                             query = it
                             viewModel.setQuery(it)
                         },
-                        label = { Text(stringResource(R.string.search_exercises)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        placeholder = { Text(stringResource(R.string.search_exercises), color = OnSurfaceVariant) },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = StravaOrange) },
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Charcoal,
+                            unfocusedContainerColor = Charcoal,
+                            focusedBorderColor = StravaOrange,
+                            unfocusedBorderColor = GlassBorder,
+                            focusedTextColor = OnSurface,
+                            unfocusedTextColor = OnSurface
+                        ),
+                        modifier = Modifier.fillMaxWidth()
                     )
                     FilterChips(
                         selectedCategories = categories,
                         onToggle = viewModel::toggleCategory
                     )
                 }
-                items(exercises, key = { it.id }) { exercise ->
-                    SelectableExerciseRow(
-                        exercise = exercise,
-                        checked = exercise.id in selected,
-                        onToggle = { viewModel.toggleSelection(exercise.id) }
-                    )
-                }
+            }
+            items(exercises, key = { it.id }) { exercise ->
+                SelectableExerciseRow(
+                    exercise = exercise,
+                    checked = exercise.id in selected,
+                    onToggle = { viewModel.toggleSelection(exercise.id) }
+                )
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SelectableExerciseRow(
     exercise: Exercise,
     checked: Boolean,
     onToggle: () -> Unit
 ) {
-    androidx.compose.material3.Card(
+    GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        onClick = onToggle
+        onClick = onToggle,
+        shape = RoundedCornerShape(14.dp),
+        backgroundColor = if (checked) StravaOrange.copy(alpha = 0.18f) else Charcoal,
+        borderColor = if (checked) StravaOrange else GlassBorder,
+        hasGlow = checked
     ) {
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
-            contentAlignment = Alignment.CenterStart
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Checkbox(checked = checked, onCheckedChange = { onToggle() })
-            Text(
-                text = exercise.name,
-                modifier = Modifier.padding(start = 48.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(if (checked) StravaOrange else SurfaceContainerHighest)
+                    .border(1.dp, if (checked) StravaOrange else GlassBorder, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                if (checked) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        tint = TrueBlack,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+            Spacer(Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = exercise.name,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = OnSurface
+                )
+                Text(
+                    text = titleCase(exercise.target),
+                    style = LabelCaps.copy(fontSize = 10.sp),
+                    color = StravaOrange
+                )
+            }
         }
     }
 }

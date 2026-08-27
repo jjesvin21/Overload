@@ -1,25 +1,37 @@
 /**
- * Workout groups list with create, swipe-delete, and quick actions.
+ * Workout groups list with Apex Athletic / Liquid Glass dashboard design.
+ * Features Today's Focus quick-start banner, Weekly Progress liquid chart with real-time data, and My Groups cards.
  */
 package com.overloadtracker.ui.screens.groups
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -43,19 +55,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.overloadtracker.R
-import com.overloadtracker.data.local.entity.WorkoutGroup
-import com.overloadtracker.util.formatDuration
+import com.overloadtracker.ui.components.GlassCard
+import com.overloadtracker.ui.theme.Charcoal
+import com.overloadtracker.ui.theme.DisplayMetrics
+import com.overloadtracker.ui.theme.HeadlineLargeMobile
+import com.overloadtracker.ui.theme.LabelCaps
+import com.overloadtracker.ui.theme.OnSurface
+import com.overloadtracker.ui.theme.OnSurfaceVariant
+import com.overloadtracker.ui.theme.SecondaryText
+import com.overloadtracker.ui.theme.StravaOrange
+import com.overloadtracker.ui.theme.SurfaceContainerHighest
+import com.overloadtracker.ui.theme.TrueBlack
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/**
- * Lists workout groups with FAB create, swipe delete + undo, and navigation actions.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyGroupsScreen(
@@ -65,6 +89,7 @@ fun MyGroupsScreen(
     viewModel: GroupsViewModel = hiltViewModel()
 ) {
     val groups by viewModel.groups.collectAsState()
+    val weeklyProgress by viewModel.weeklyProgress.collectAsState()
     val deletedGroup by viewModel.deletedGroup.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var showCreateDialog by remember { mutableStateOf(false) }
@@ -87,42 +112,309 @@ fun MyGroupsScreen(
 
     Scaffold(
         modifier = modifier,
+        containerColor = Color.Transparent,
         floatingActionButton = {
-            FloatingActionButton(onClick = { showCreateDialog = true }) {
+            FloatingActionButton(
+                onClick = { showCreateDialog = true },
+                containerColor = StravaOrange,
+                contentColor = Color.White,
+                shape = CircleShape,
+                modifier = Modifier.shadow(12.dp, CircleShape, spotColor = StravaOrange)
+            ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.create_group))
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        if (groups.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.empty_groups),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            // Top Bar Header
+            item {
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(SurfaceContainerHighest)
+                                .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.FitnessCenter,
+                                contentDescription = null,
+                                tint = StravaOrange,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = "Overload",
+                            style = HeadlineLargeMobile,
+                            color = StravaOrange
+                        )
+                    }
+                    IconButton(
+                        onClick = {},
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.05f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = OnSurfaceVariant
+                        )
+                    }
+                }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
-            ) {
-                items(groups, key = { it.group.id }) { item ->
+
+            // Today's Focus / Quick Start Card
+            item {
+                val topGroup = groups.firstOrNull()
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Ready to crush it?",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = OnSurfaceVariant
+                    )
+                    Text(
+                        text = "Today's Focus",
+                        style = HeadlineLargeMobile,
+                        color = OnSurface
+                    )
+                    GlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        hasGlow = true,
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(StravaOrange.copy(alpha = 0.12f))
+                                    .border(1.dp, StravaOrange.copy(alpha = 0.3f), CircleShape)
+                                    .padding(horizontal = 14.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "UP NEXT",
+                                    style = LabelCaps.copy(fontWeight = FontWeight.Bold),
+                                    color = StravaOrange
+                                )
+                            }
+                            Text(
+                                text = topGroup?.group?.name ?: "Full Body",
+                                style = DisplayMetrics.copy(fontSize = 36.sp, lineHeight = 40.sp),
+                                color = OnSurface
+                            )
+                            Text(
+                                text = topGroup?.group?.notes ?: "Heavy compound movements.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = OnSurfaceVariant
+                            )
+
+                            // Start Workout Pill Button
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp)
+                                    .shadow(
+                                        elevation = 16.dp,
+                                        shape = RoundedCornerShape(28.dp),
+                                        spotColor = StravaOrange
+                                    )
+                                    .clip(RoundedCornerShape(28.dp))
+                                    .background(StravaOrange)
+                                    .clickable {
+                                        topGroup?.group?.id?.let { onStartWorkout(it) }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.PlayArrow,
+                                        contentDescription = null,
+                                        tint = TrueBlack,
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        text = "Start Workout",
+                                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = TrueBlack
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Real-Time Weekly Progress Bar Chart Section
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Text(
+                            text = "Weekly Progress",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = OnSurface
+                        )
+                        Text(
+                            text = "${weeklyProgress.completedSessionsThisWeek} / ${weeklyProgress.targetSessionsPerWeek} Sessions",
+                            style = LabelCaps,
+                            color = StravaOrange
+                        )
+                    }
+                    GlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(110.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.Bottom
+                            ) {
+                                weeklyProgress.days.forEach { dayUi ->
+                                    val animatedFraction by animateFloatAsState(
+                                        targetValue = dayUi.fraction,
+                                        label = "weekly_bar_${dayUi.dayLabel}"
+                                    )
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Bottom,
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .width(22.dp)
+                                                .height(80.dp)
+                                                .clip(RoundedCornerShape(11.dp))
+                                                .background(
+                                                    if (dayUi.isToday) SurfaceContainerHighest.copy(alpha = 0.8f) else SurfaceContainerHighest
+                                                )
+                                                .then(
+                                                    if (dayUi.isToday) {
+                                                        Modifier.border(1.dp, StravaOrange.copy(alpha = 0.5f), RoundedCornerShape(11.dp))
+                                                    } else {
+                                                        Modifier
+                                                    }
+                                                ),
+                                            contentAlignment = Alignment.BottomCenter
+                                        ) {
+                                            if (animatedFraction > 0f) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height((80 * animatedFraction).dp)
+                                                        .clip(RoundedCornerShape(11.dp))
+                                                        .background(
+                                                            Brush.verticalGradient(
+                                                                colors = listOf(StravaOrange, StravaOrange.copy(alpha = 0.4f))
+                                                            )
+                                                        )
+                                                )
+                                            }
+                                        }
+                                        Spacer(Modifier.height(6.dp))
+                                        Text(
+                                            text = dayUi.dayLabel,
+                                            style = LabelCaps,
+                                            color = if (dayUi.isToday) StravaOrange else if (dayUi.sessionCount > 0) OnSurface else OnSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // My Groups Section Header
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "My Groups",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = OnSurface
+                    )
+                    TextButton(onClick = { showCreateDialog = true }) {
+                        Text(
+                            text = "+ New Group",
+                            style = LabelCaps,
+                            color = StravaOrange
+                        )
+                    }
+                }
+            }
+
+            // Workout Group Items List
+            if (groups.isEmpty()) {
+                item {
+                    GlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.empty_groups),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = OnSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            } else {
+                itemsIndexed(groups, key = { _, item -> item.group.id }) { index, item ->
                     GroupSwipeCard(
                         item = item,
+                        isPrimary = index == 0,
                         onStart = { onStartWorkout(item.group.id) },
                         onEdit = { onEditGroup(item.group.id) },
                         onDelete = { viewModel.deleteGroup(item.group) }
                     )
                 }
+            }
+
+            item {
+                Spacer(Modifier.height(40.dp))
             }
         }
     }
@@ -142,6 +434,7 @@ fun MyGroupsScreen(
 @Composable
 private fun GroupSwipeCard(
     item: GroupItemUi,
+    isPrimary: Boolean,
     onStart: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit
@@ -172,10 +465,12 @@ private fun GroupSwipeCard(
         },
         enableDismissFromStartToEnd = false
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onStart)
+        GlassCard(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onStart,
+            shape = RoundedCornerShape(16.dp),
+            backgroundColor = Charcoal,
+            hasGlow = isPrimary
         ) {
             Row(
                 modifier = Modifier
@@ -184,27 +479,47 @@ private fun GroupSwipeCard(
                     .heightIn(min = 48.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(SurfaceContainerHighest),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FitnessCenter,
+                        contentDescription = null,
+                        tint = StravaOrange,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Spacer(Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = item.group.name,
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge,
+                        color = OnSurface
                     )
                     Text(
                         text = "${item.exerciseCount} exercises",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = LabelCaps,
+                        color = StravaOrange
                     )
                     item.lastPerformed?.let { ts ->
                         val fmt = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
                         Text(
                             text = "Last: ${fmt.format(Date(ts))}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            style = LabelCaps.copy(fontSize = 11.sp),
+                            color = SecondaryText
                         )
                     }
                 }
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_group))
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = stringResource(R.string.edit_group),
+                        tint = OnSurfaceVariant
+                    )
                 }
             }
         }
@@ -220,9 +535,12 @@ private fun CreateGroupDialog(
     var notes by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Charcoal,
+        titleContentColor = OnSurface,
+        textContentColor = OnSurfaceVariant,
         title = { Text(stringResource(R.string.create_group)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -243,12 +561,12 @@ private fun CreateGroupDialog(
                 onClick = { onCreate(name, notes.ifBlank { null }) },
                 enabled = name.isNotBlank()
             ) {
-                Text(stringResource(R.string.save))
+                Text(stringResource(R.string.save), color = StravaOrange)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
+                Text(stringResource(R.string.cancel), color = OnSurfaceVariant)
             }
         }
     )
