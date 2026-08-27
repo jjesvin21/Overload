@@ -120,6 +120,12 @@ class GroupEditorViewModel @Inject constructor(
         ids[index] = tmp
         viewModelScope.launch { groupRepository.reorder(groupId, ids) }
     }
+    fun deleteGroup(onDeleted: () -> Unit) {
+        viewModelScope.launch {
+            groupRepository.deleteGroup(groupId)
+            onDeleted()
+        }
+    }
 }
 
 /**
@@ -171,6 +177,15 @@ fun GroupEditorScreen(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                             tint = OnSurfaceVariant
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { viewModel.deleteGroup(onBack) }) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.delete),
+                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                 }

@@ -76,6 +76,12 @@ class GroupsViewModel @Inject constructor(
                 ) { items -> items.toList() }
             }
         }
+        .map { list ->
+            list.sortedWith(
+                compareBy<GroupItemUi> { it.lastPerformed ?: 0L }
+                    .thenBy { it.group.createdAt }
+            )
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val weeklyProgress: StateFlow<WeeklyProgressUi> = sessionRepository.observeSessions()
