@@ -25,6 +25,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -52,6 +56,7 @@ data class LiveExercise(
     val exerciseId: String,
     val exerciseName: String,
     val isCardio: Boolean = false,
+    val isBodyweight: Boolean = false,
     val sets: List<LiveSet>,
     val expanded: Boolean = true,
     val prevBestLabel: String? = null
@@ -99,6 +104,9 @@ class LiveWorkoutViewModel @Inject constructor(
         val existing = activeSessionManager.activeSession.value
         if (existing != null && existing.groupId == groupId) {
             startTime = existing.startTime
+            if (existing.exercises.isNotEmpty()) {
+                _uiState.update { it.copy(exercises = existing.exercises) }
+            }
         } else {
             startTime = System.currentTimeMillis()
             activeSessionManager.startSession(groupId, "", startTime)
@@ -129,33 +137,68 @@ class LiveWorkoutViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadExercises(refs: List<GroupExerciseCrossRef>, unit: WeightUnit) {
+    private fun checkIfBodyweight(equipment: String, category: String, name: String): Boolean {
+        val eq = equipment.lowercase()
+        val cat = category.lowercase()
+        val nm = name.lowercase()
+        return eq.contains("body") ||
+               eq.contains("none") ||
+               cat.contains("bodyweight") ||
+               cat.contains("calisthenics") ||
+               nm.contains("bodyweight") ||
+               nm.contains("body weight") ||
+               nm.contains("push-up") ||
+               nm.contains("push up") ||
+               nm.contains("pull-up") ||
+               nm.contains("pull up") ||
+               nm.contains("chin-up") ||
+               nm.contains("chin up") ||
+               nm.contains("dip") ||
+               nm.contains("crunch") ||
+               nm.contains("plank") ||
+               nm.contains("sit-up") ||
+               nm.contains("sit up")
+    }
+
+    private suspend fun loadExercises(refs: List<GroupExerciseCrossRef>, unit: WeightUnit) = coroutineScope {
         val current = _uiState.value.exercises.associateBy { it.exerciseId }
         val exercises = refs.map { ref ->
-            val existing = current[ref.exercise.id]
-            if (existing != null) {
-                existing
-            } else {
-                val isCardio = ref.exercise.category.equals("cardio", ignoreCase = true)
-                val last = sessionRepository.getLastSet(ref.exercise.id)
-                val prevLabel = last?.let { info ->
-                    if (isCardio) {
-                        formatCardioDisplay(info.timeSeconds, info.count)
-                    } else {
-                        val w = WeightUtils.formatWeight(info.weight, unit)
-                        "$w × ${info.reps}"
+            async(Dispatchers.IO) {
+                val existing = current[ref.exercise.id]
+                if (existing != null) {
+                    existing
+                } else {
+                    val isCardio = ref.exercise.category.equals("cardio", ignoreCase = true)
+                    val isBodyweight = !isCardio && checkIfBodyweight(ref.exercise.equipment, ref.exercise.category, ref.exercise.name)
+                    val last = sessionRepository.getLastSet(ref.exercise.id)
+                    val prevLabel = last?.let { info ->
+                        if (isCardio) {
+                            formatCardioDisplay(info.timeSeconds, info.count)
+                        } else if (isBodyweight) {
+                            "BW × ${info.reps}"
+                        } else {
+                            val w = WeightUtils.formatWeight(info.weight, unit)
+                            "$w × ${info.reps}"
+                        }
                     }
+                    LiveExercise(
+                        exerciseId = ref.exercise.id,
+                        exerciseName = ref.exercise.name,
+                        isCardio = isCardio,
+                        isBodyweight = isBodyweight,
+                        sets = (1..3).map { defaultSet(it, last, unit, isCardio) },
+                        prevBestLabel = prevLabel
+                    )
                 }
-                LiveExercise(
-                    exerciseId = ref.exercise.id,
-                    exerciseName = ref.exercise.name,
-                    isCardio = isCardio,
-                    sets = (1..3).map { defaultSet(it, last, unit, isCardio) },
-                    prevBestLabel = prevLabel
-                )
             }
-        }
-        _uiState.update { it.copy(exercises = exercises) }
+        }.awaitAll()
+
+        val refIds = refs.map { it.exercise.id }.toSet()
+        val extraExercises = _uiState.value.exercises.filter { it.exerciseId !in refIds }
+        val merged = exercises + extraExercises
+
+        _uiState.update { it.copy(exercises = merged) }
+        activeSessionManager.updateExercises(merged)
     }
 
     private fun defaultSet(
@@ -198,11 +241,11 @@ class LiveWorkoutViewModel @Inject constructor(
 
     fun toggleExpanded(exerciseId: String) {
         _uiState.update { state ->
-            state.copy(
-                exercises = state.exercises.map {
-                    if (it.exerciseId == exerciseId) it.copy(expanded = !it.expanded) else it
-                }
-            )
+            val newExercises = state.exercises.map {
+                if (it.exerciseId == exerciseId) it.copy(expanded = !it.expanded) else it
+            }
+            activeSessionManager.updateExercises(newExercises)
+            state.copy(exercises = newExercises)
         }
     }
 
@@ -243,6 +286,11 @@ class LiveWorkoutViewModel @Inject constructor(
                     _uiState.update { it.copy(validationMessage = "Enter time or count before completing a set.") }
                     return
                 }
+            } else if (exercise.isBodyweight) {
+                if (set.reps <= 0) {
+                    _uiState.update { it.copy(validationMessage = "Enter reps before completing a set.") }
+                    return
+                }
             } else {
                 if (set.weightKg <= 0.0 || set.reps <= 0) {
                     _uiState.update { it.copy(validationMessage = "Enter a weight and reps before completing a set.") }
@@ -263,43 +311,43 @@ class LiveWorkoutViewModel @Inject constructor(
 
     private fun updateSet(exerciseId: String, setNumber: Int, transform: (LiveSet) -> LiveSet) {
         _uiState.update { state ->
-            state.copy(
-                exercises = state.exercises.map { ex ->
-                    if (ex.exerciseId != exerciseId) ex
-                    else ex.copy(
-                        sets = ex.sets.map { set ->
-                            if (set.setNumber == setNumber) transform(set) else set
-                        }
-                    )
-                }
-            )
+            val newExercises = state.exercises.map { ex ->
+                if (ex.exerciseId != exerciseId) ex
+                else ex.copy(
+                    sets = ex.sets.map { set ->
+                        if (set.setNumber == setNumber) transform(set) else set
+                    }
+                )
+            }
+            activeSessionManager.updateExercises(newExercises)
+            state.copy(exercises = newExercises)
         }
     }
 
     fun addSet(exerciseId: String) {
         _uiState.update { state ->
-            state.copy(
-                exercises = state.exercises.map { ex ->
-                    if (ex.exerciseId != exerciseId) ex
-                    else {
-                        val next = ex.sets.size + 1
-                        val last = ex.sets.lastOrNull()
-                        ex.copy(
-                            sets = ex.sets + LiveSet(
-                                setNumber = next,
-                                weightKg = last?.weightKg ?: 0.0,
-                                reps = last?.reps ?: 0,
-                                timeSeconds = last?.timeSeconds,
-                                count = last?.count,
-                                weightDisplay = last?.weightDisplay.orEmpty(),
-                                repsDisplay = last?.repsDisplay.orEmpty(),
-                                timeDisplay = last?.timeDisplay.orEmpty(),
-                                countDisplay = last?.countDisplay.orEmpty()
-                            )
+            val newExercises = state.exercises.map { ex ->
+                if (ex.exerciseId != exerciseId) ex
+                else {
+                    val next = ex.sets.size + 1
+                    val last = ex.sets.lastOrNull()
+                    ex.copy(
+                        sets = ex.sets + LiveSet(
+                            setNumber = next,
+                            weightKg = last?.weightKg ?: 0.0,
+                            reps = last?.reps ?: 0,
+                            timeSeconds = last?.timeSeconds,
+                            count = last?.count,
+                            weightDisplay = last?.weightDisplay.orEmpty(),
+                            repsDisplay = last?.repsDisplay.orEmpty(),
+                            timeDisplay = last?.timeDisplay.orEmpty(),
+                            countDisplay = last?.countDisplay.orEmpty()
                         )
-                    }
+                    )
                 }
-            )
+            }
+            activeSessionManager.updateExercises(newExercises)
+            state.copy(exercises = newExercises)
         }
     }
 
@@ -308,24 +356,28 @@ class LiveWorkoutViewModel @Inject constructor(
         viewModelScope.launch {
             val unit = _uiState.value.weightUnit
             val isCardio = exercise.category.equals("cardio", ignoreCase = true)
+            val isBodyweight = !isCardio && checkIfBodyweight(exercise.equipment, exercise.category, exercise.name)
             val last = sessionRepository.getLastSet(exercise.id)
             val prevLabel = last?.let { info ->
                 if (isCardio) {
                     formatCardioDisplay(info.timeSeconds, info.count)
+                } else if (isBodyweight) {
+                    "BW × ${info.reps}"
                 } else {
                     "${WeightUtils.formatWeight(info.weight, unit)} × ${info.reps}"
                 }
             }
             _uiState.update { state ->
-                state.copy(
-                    exercises = state.exercises + LiveExercise(
-                        exerciseId = exercise.id,
-                        exerciseName = exercise.name,
-                        isCardio = isCardio,
-                        sets = (1..3).map { defaultSet(it, last, unit, isCardio) },
-                        prevBestLabel = prevLabel
-                    )
+                val newExercises = state.exercises + LiveExercise(
+                    exerciseId = exercise.id,
+                    exerciseName = exercise.name,
+                    isCardio = isCardio,
+                    isBodyweight = isBodyweight,
+                    sets = (1..3).map { defaultSet(it, last, unit, isCardio) },
+                    prevBestLabel = prevLabel
                 )
+                activeSessionManager.updateExercises(newExercises)
+                state.copy(exercises = newExercises)
             }
         }
     }
@@ -366,11 +418,17 @@ class LiveWorkoutViewModel @Inject constructor(
     }
 
     fun finishWorkout(onComplete: (Long) -> Unit) {
+        if (_uiState.value.exercises.isEmpty()) {
+            _uiState.update { it.copy(validationMessage = "No exercises were added in this split.") }
+            return
+        }
         val hasCompletedSet = _uiState.value.exercises.any { exercise ->
             exercise.sets.any { set ->
                 if (!set.isCompleted) false
                 else if (exercise.isCardio) {
                     (set.timeSeconds != null && set.timeSeconds > 0) || (set.count != null && set.count > 0)
+                } else if (exercise.isBodyweight) {
+                    set.reps > 0
                 } else {
                     set.weightKg > 0.0 && set.reps > 0
                 }
@@ -410,6 +468,11 @@ class LiveWorkoutViewModel @Inject constructor(
             _uiState.update { it.copy(isFinishing = false) }
             onComplete(sessionId)
         }
+    }
+
+    fun discardWorkout(onDiscard: () -> Unit) {
+        activeSessionManager.clearSession()
+        onDiscard()
     }
 }
 

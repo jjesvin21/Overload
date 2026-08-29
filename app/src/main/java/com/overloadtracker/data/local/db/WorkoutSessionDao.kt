@@ -14,8 +14,16 @@ import com.overloadtracker.data.model.ExerciseProgressPoint
 import com.overloadtracker.data.model.PreviousSetInfo
 import kotlinx.coroutines.flow.Flow
 
+data class GroupLastPerformed(
+    val groupId: Long,
+    val lastPerformed: Long
+)
+
 @Dao
 interface WorkoutSessionDao {
+
+    @Query("SELECT groupId, MAX(endTime) as lastPerformed FROM workout_sessions WHERE groupId IS NOT NULL GROUP BY groupId")
+    fun observeGroupLastPerformed(): Flow<List<GroupLastPerformed>>
 
     @Query("SELECT * FROM workout_sessions ORDER BY endTime DESC")
     fun getAllSessions(): Flow<List<WorkoutSession>>

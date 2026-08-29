@@ -29,6 +29,11 @@ class WorkoutSessionRepository @Inject constructor(
 ) {
     fun observeSessions(): Flow<List<WorkoutSession>> = sessionDao.getAllSessions()
 
+    fun observeGroupLastPerformedMap(): Flow<Map<Long, Long>> =
+        sessionDao.observeGroupLastPerformed().map { list ->
+            list.associate { it.groupId to it.lastPerformed }
+        }
+
     fun observeSession(id: Long): Flow<SessionWithSets?> = sessionDao.getSessionWithSets(id)
 
     fun observeSummaries(): Flow<List<WorkoutSummary>> = combine(
