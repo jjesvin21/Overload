@@ -79,6 +79,9 @@ import com.overloadtracker.ui.theme.SurfaceContainerHighest
 import com.overloadtracker.ui.theme.TrueBlack
 import com.overloadtracker.util.formatDuration
 
+import androidx.compose.material.icons.filled.Info
+import com.overloadtracker.ui.components.ExerciseDetailSheet
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LiveWorkoutScreen(
@@ -183,37 +186,117 @@ fun LiveWorkoutScreen(
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(uiState.exercises, key = { it.exerciseId }) { exercise ->
-                    ExerciseSection(
-                        exercise = exercise,
-                        onToggleExpand = { viewModel.toggleExpanded(exercise.exerciseId) },
-                        onWeightChange = { setNum, value ->
-                            viewModel.updateWeight(exercise.exerciseId, setNum, value)
-                        },
-                        onRepsChange = { setNum, value ->
-                            viewModel.updateReps(exercise.exerciseId, setNum, value)
-                        },
-                        onTimeChange = { setNum, value ->
-                            viewModel.updateTime(exercise.exerciseId, setNum, value)
-                        },
-                        onCountChange = { setNum, value ->
-                            viewModel.updateCount(exercise.exerciseId, setNum, value)
-                        },
-                        onRpeChange = { setNum, rpe ->
-                            viewModel.updateRpe(exercise.exerciseId, setNum, rpe)
-                        },
-                        onCompleteChange = { setNum, done ->
-                            viewModel.toggleSetComplete(exercise.exerciseId, setNum, done)
-                        },
-                        onAddSet = { viewModel.addSet(exercise.exerciseId) }
-                    )
+                if (uiState.exercises.isEmpty()) {
+                    item {
+                        GlassCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 24.dp),
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(28.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(56.dp)
+                                        .clip(CircleShape)
+                                        .background(SurfaceContainerHighest),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.FitnessCenter,
+                                        contentDescription = null,
+                                        tint = StravaOrange,
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                }
+                                Text(
+                                    text = "No Exercises Added",
+                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = OnSurface
+                                )
+                                Text(
+                                    text = "This split has no exercises configured. Tap below to select exercises from your library.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = OnSurfaceVariant,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(48.dp)
+                                        .shadow(8.dp, RoundedCornerShape(24.dp), spotColor = StravaOrange)
+                                        .clip(RoundedCornerShape(24.dp))
+                                        .background(StravaOrange)
+                                        .clickable { showAddExercise = true },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = null,
+                                            tint = TrueBlack,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = stringResource(R.string.add_exercises),
+                                            style = LabelCaps.copy(fontWeight = FontWeight.Bold),
+                                            color = TrueBlack
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    items(uiState.exercises, key = { it.exerciseId }) { exercise ->
+                        ExerciseSection(
+                            exercise = exercise,
+                            onToggleExpand = { viewModel.toggleExpanded(exercise.exerciseId) },
+                            onSelectExercise = { viewModel.selectExerciseDetail(exercise.exerciseId) },
+                            onWeightChange = { setNum, value ->
+                                viewModel.updateWeight(exercise.exerciseId, setNum, value)
+                            },
+                            onRepsChange = { setNum, value ->
+                                viewModel.updateReps(exercise.exerciseId, setNum, value)
+                            },
+                            onTimeChange = { setNum, value ->
+                                viewModel.updateTime(exercise.exerciseId, setNum, value)
+                            },
+                            onCountChange = { setNum, value ->
+                                viewModel.updateCount(exercise.exerciseId, setNum, value)
+                            },
+                            onRpeChange = { setNum, rpe ->
+                                viewModel.updateRpe(exercise.exerciseId, setNum, rpe)
+                            },
+                            onCompleteChange = { setNum, done ->
+                                viewModel.toggleSetComplete(exercise.exerciseId, setNum, done)
+                            },
+                            onAddSet = { viewModel.addSet(exercise.exerciseId) }
+                        )
+                    }
                 }
 
                 item {
                     Spacer(Modifier.height(40.dp))
                 }
             }
+
         }
+    }
+
+    if (uiState.selectedExerciseDetail != null) {
+        ExerciseDetailSheet(
+            detailWithHistory = uiState.selectedExerciseDetail,
+            weightUnit = uiState.weightUnit,
+            onDismiss = viewModel::dismissExerciseDetail
+        )
     }
 
     if (showDiscardDialog) {
@@ -301,6 +384,7 @@ private fun BoxWithRestTimer(
 private fun ExerciseSection(
     exercise: LiveExercise,
     onToggleExpand: () -> Unit,
+    onSelectExercise: () -> Unit,
     onWeightChange: (Int, String) -> Unit,
     onRepsChange: (Int, String) -> Unit,
     onTimeChange: (Int, String) -> Unit,
@@ -316,7 +400,9 @@ private fun ExerciseSection(
         Column(modifier = Modifier.padding(16.dp)) {
             // Exercise Header Row
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onSelectExercise),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
@@ -367,6 +453,13 @@ private fun ExerciseSection(
                             text = "$completedCount/$totalCount SETS",
                             style = LabelCaps.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
                             color = StravaOrange
+                        )
+                    }
+                    IconButton(onClick = onSelectExercise) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Exercise Details & History",
+                            tint = OnSurfaceVariant
                         )
                     }
                     IconButton(onClick = onToggleExpand) {

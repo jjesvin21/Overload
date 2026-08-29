@@ -24,8 +24,9 @@ data class GroupWithExercises(
 data class GroupExerciseCrossRef(
     @Embedded val crossRef: GroupExercise,
     @Relation(parentColumn = "exerciseId", entityColumn = "id")
-    val exercise: Exercise
+    val exercise: Exercise? = null
 )
+
 
 data class SessionWithSets(
     @Embedded val session: WorkoutSession,

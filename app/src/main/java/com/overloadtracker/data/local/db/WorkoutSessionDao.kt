@@ -70,6 +70,19 @@ interface WorkoutSessionDao {
 
     @Query(
         """
+        SELECT ss.sessionId AS sessionId, s.endTime AS sessionDateMillis, s.groupName AS groupName,
+               ss.setNumber AS setNumber, ss.weight AS weight, ss.reps AS reps,
+               ss.timeSeconds AS timeSeconds, ss.count AS count, ss.rpe AS rpe
+        FROM session_sets ss
+        INNER JOIN workout_sessions s ON s.id = ss.sessionId
+        WHERE ss.exerciseId = :exerciseId AND ss.isCompleted = 1
+        ORDER BY s.endTime DESC, ss.setNumber ASC
+        """
+    )
+    suspend fun getPastSetsForExercise(exerciseId: String): List<com.overloadtracker.data.model.PastExerciseSetLog>
+
+    @Query(
+        """
         SELECT s.endTime AS dateMillis, MAX(ss.weight) AS maxWeight, MAX(ss.weight * ss.reps) AS maxVolume
         FROM session_sets ss
         INNER JOIN workout_sessions s ON s.id = ss.sessionId

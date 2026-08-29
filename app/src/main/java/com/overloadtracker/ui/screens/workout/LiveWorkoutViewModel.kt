@@ -67,7 +67,8 @@ data class LiveWorkoutUiState(
     val isFinishing: Boolean = false,
     val weightUnit: WeightUnit = WeightUnit.KG,
     val defaultRestSeconds: Int = 90,
-    val validationMessage: String? = null
+    val validationMessage: String? = null,
+    val selectedExerciseDetail: com.overloadtracker.data.model.ExerciseDetailWithHistory? = null
 )
 
 /**
@@ -119,13 +120,14 @@ class LiveWorkoutViewModel @Inject constructor(
 
     private suspend fun loadExercises(refs: List<GroupExerciseCrossRef>, unit: WeightUnit) {
         val current = _uiState.value.exercises.associateBy { it.exerciseId }
-        val exercises = refs.map { ref ->
-            val existing = current[ref.exercise.id]
+        val exercises = refs.mapNotNull { ref ->
+            val ex = ref.exercise ?: return@mapNotNull null
+            val existing = current[ex.id]
             if (existing != null) {
                 existing
             } else {
-                val isCardio = ref.exercise.category.equals("cardio", ignoreCase = true)
-                val last = sessionRepository.getLastSet(ref.exercise.id)
+                val isCardio = ex.category.equals("cardio", ignoreCase = true)
+                val last = sessionRepository.getLastSet(ex.id)
                 val prevLabel = last?.let { info ->
                     if (isCardio) {
                         formatCardioDisplay(info.timeSeconds, info.count)
@@ -135,8 +137,8 @@ class LiveWorkoutViewModel @Inject constructor(
                     }
                 }
                 LiveExercise(
-                    exerciseId = ref.exercise.id,
-                    exerciseName = ref.exercise.name,
+                    exerciseId = ex.id,
+                    exerciseName = ex.name,
                     isCardio = isCardio,
                     sets = (1..3).map { defaultSet(it, last, unit, isCardio) },
                     prevBestLabel = prevLabel
@@ -145,6 +147,7 @@ class LiveWorkoutViewModel @Inject constructor(
         }
         _uiState.update { it.copy(exercises = exercises) }
     }
+
 
     private fun defaultSet(
         number: Int,
@@ -340,6 +343,17 @@ class LiveWorkoutViewModel @Inject constructor(
 
     fun clearValidationMessage() {
         _uiState.update { it.copy(validationMessage = null) }
+    }
+
+    fun selectExerciseDetail(exerciseId: String) {
+        viewModelScope.launch {
+            val detail = sessionRepository.getExerciseDetailWithHistory(exerciseId)
+            _uiState.update { it.copy(selectedExerciseDetail = detail) }
+        }
+    }
+
+    fun dismissExerciseDetail() {
+        _uiState.update { it.copy(selectedExerciseDetail = null) }
     }
 
     fun finishWorkout(onComplete: (Long) -> Unit) {

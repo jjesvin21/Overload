@@ -80,6 +80,25 @@ class WorkoutSessionRepository @Inject constructor(
     suspend fun getPRWeight(exerciseId: String): Double? =
         sessionDao.getPRWeight(exerciseId)
 
+    suspend fun getExerciseDetailWithHistory(exerciseId: String): com.overloadtracker.data.model.ExerciseDetailWithHistory? {
+        val exercise = exerciseDao.getById(exerciseId) ?: return null
+        val pr = sessionDao.getPRWeight(exerciseId)
+        val pastSets = sessionDao.getPastSetsForExercise(exerciseId)
+        val sessionGroups = pastSets.groupBy { it.sessionId }.map { (sessionId, sets) ->
+            com.overloadtracker.data.model.ExerciseHistorySessionGroup(
+                sessionId = sessionId,
+                sessionDateMillis = sets.first().sessionDateMillis,
+                groupName = sets.first().groupName,
+                sets = sets
+            )
+        }
+        return com.overloadtracker.data.model.ExerciseDetailWithHistory(
+            exercise = exercise,
+            prWeightKg = pr,
+            pastSessions = sessionGroups
+        )
+    }
+
     suspend fun finishWorkout(
         groupId: Long?,
         groupName: String,
