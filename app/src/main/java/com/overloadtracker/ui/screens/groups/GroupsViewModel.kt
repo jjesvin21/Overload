@@ -53,11 +53,13 @@ data class WeeklyProgressUi(
 @HiltViewModel
 class GroupsViewModel @Inject constructor(
     private val groupRepository: WorkoutGroupRepository,
-    private val sessionRepository: WorkoutSessionRepository
+    private val sessionRepository: WorkoutSessionRepository,
+    private val activeSessionManager: com.overloadtracker.data.manager.ActiveSessionManager
 ) : ViewModel() {
 
     private val _deletedGroup = MutableStateFlow<WorkoutGroup?>(null)
     val deletedGroup: StateFlow<WorkoutGroup?> = _deletedGroup.asStateFlow()
+    val activeSession = activeSessionManager.activeSession
 
     val groups: StateFlow<List<GroupItemUi>> = groupRepository.observeGroups()
         .flatMapLatest { groupList ->

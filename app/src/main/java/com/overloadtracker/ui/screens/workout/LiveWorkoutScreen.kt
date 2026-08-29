@@ -79,6 +79,9 @@ import com.overloadtracker.ui.theme.SurfaceContainerHighest
 import com.overloadtracker.ui.theme.TrueBlack
 import com.overloadtracker.util.formatDuration
 
+import androidx.compose.material.icons.filled.Info
+import com.overloadtracker.ui.components.ExerciseDetailSheet
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LiveWorkoutScreen(
@@ -187,6 +190,7 @@ fun LiveWorkoutScreen(
                     ExerciseSection(
                         exercise = exercise,
                         onToggleExpand = { viewModel.toggleExpanded(exercise.exerciseId) },
+                        onSelectExercise = { viewModel.selectExerciseDetail(exercise.exerciseId) },
                         onWeightChange = { setNum, value ->
                             viewModel.updateWeight(exercise.exerciseId, setNum, value)
                         },
@@ -214,6 +218,14 @@ fun LiveWorkoutScreen(
                 }
             }
         }
+    }
+
+    if (uiState.selectedExerciseDetail != null) {
+        ExerciseDetailSheet(
+            detailWithHistory = uiState.selectedExerciseDetail,
+            weightUnit = uiState.weightUnit,
+            onDismiss = viewModel::dismissExerciseDetail
+        )
     }
 
     if (showDiscardDialog) {
@@ -301,6 +313,7 @@ private fun BoxWithRestTimer(
 private fun ExerciseSection(
     exercise: LiveExercise,
     onToggleExpand: () -> Unit,
+    onSelectExercise: () -> Unit,
     onWeightChange: (Int, String) -> Unit,
     onRepsChange: (Int, String) -> Unit,
     onTimeChange: (Int, String) -> Unit,
@@ -316,7 +329,9 @@ private fun ExerciseSection(
         Column(modifier = Modifier.padding(16.dp)) {
             // Exercise Header Row
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onSelectExercise),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
@@ -367,6 +382,13 @@ private fun ExerciseSection(
                             text = "$completedCount/$totalCount SETS",
                             style = LabelCaps.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
                             color = StravaOrange
+                        )
+                    }
+                    IconButton(onClick = onSelectExercise) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Exercise Details & History",
+                            tint = OnSurfaceVariant
                         )
                     }
                     IconButton(onClick = onToggleExpand) {
@@ -456,4 +478,3 @@ private fun ExerciseSection(
         }
     }
 }
-

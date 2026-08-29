@@ -43,3 +43,28 @@ data class CsvExportRow(
     val notes: String
 )
 
+data class PastExerciseSetLog(
+    val sessionId: Long,
+    val sessionDateMillis: Long,
+    val groupName: String,
+    val setNumber: Int,
+    val weight: Double,
+    val reps: Int,
+    val timeSeconds: Int? = null,
+    val count: Int? = null,
+    val rpe: Int? = null
+)
+
+data class ExerciseHistorySessionGroup(
+    val sessionId: Long,
+    val sessionDateMillis: Long,
+    val groupName: String,
+    val sets: List<PastExerciseSetLog>
+)
+
+data class ExerciseDetailWithHistory(
+    val exercise: com.overloadtracker.data.local.entity.Exercise,
+    val prWeightKg: Double?,
+    val pastSessions: List<ExerciseHistorySessionGroup>
+)
+

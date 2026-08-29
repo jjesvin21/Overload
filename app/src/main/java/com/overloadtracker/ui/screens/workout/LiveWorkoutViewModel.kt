@@ -67,7 +67,8 @@ data class LiveWorkoutUiState(
     val isFinishing: Boolean = false,
     val weightUnit: WeightUnit = WeightUnit.KG,
     val defaultRestSeconds: Int = 90,
-    val validationMessage: String? = null
+    val validationMessage: String? = null,
+    val selectedExerciseDetail: com.overloadtracker.data.model.ExerciseDetailWithHistory? = null
 )
 
 /**
@@ -79,11 +80,12 @@ class LiveWorkoutViewModel @Inject constructor(
     private val groupRepository: WorkoutGroupRepository,
     private val exerciseRepository: ExerciseRepository,
     private val sessionRepository: WorkoutSessionRepository,
-    private val prefs: UserPreferencesRepository
+    private val prefs: UserPreferencesRepository,
+    private val activeSessionManager: com.overloadtracker.data.manager.ActiveSessionManager
 ) : ViewModel() {
 
     private val groupId: Long = savedStateHandle.toRoute<LiveWorkoutRoute>().groupId
-    private val startTime = System.currentTimeMillis()
+    private var startTime: Long = System.currentTimeMillis()
 
     private val _uiState = MutableStateFlow(
         LiveWorkoutUiState(groupId = groupId)
@@ -94,13 +96,23 @@ class LiveWorkoutViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeightUnit.KG)
 
     init {
+        val existing = activeSessionManager.activeSession.value
+        if (existing != null && existing.groupId == groupId) {
+            startTime = existing.startTime
+        } else {
+            startTime = System.currentTimeMillis()
+            activeSessionManager.startSession(groupId, "", startTime)
+        }
+
         viewModelScope.launch {
             val unit = prefs.weightUnit.first()
             val rest = prefs.defaultRestSeconds.first()
             _uiState.update { it.copy(weightUnit = unit, defaultRestSeconds = rest, restTotalSeconds = rest) }
 
             val group = groupRepository.getGroup(groupId)
-            _uiState.update { it.copy(groupName = group?.name.orEmpty()) }
+            val name = group?.name.orEmpty()
+            _uiState.update { it.copy(groupName = name) }
+            activeSessionManager.updateGroupName(name)
 
             groupRepository.observeGroupExercises(groupId).collect { refs ->
                 loadExercises(refs, unit)
@@ -342,6 +354,17 @@ class LiveWorkoutViewModel @Inject constructor(
         _uiState.update { it.copy(validationMessage = null) }
     }
 
+    fun selectExerciseDetail(exerciseId: String) {
+        viewModelScope.launch {
+            val detail = sessionRepository.getExerciseDetailWithHistory(exerciseId)
+            _uiState.update { it.copy(selectedExerciseDetail = detail) }
+        }
+    }
+
+    fun dismissExerciseDetail() {
+        _uiState.update { it.copy(selectedExerciseDetail = null) }
+    }
+
     fun finishWorkout(onComplete: (Long) -> Unit) {
         val hasCompletedSet = _uiState.value.exercises.any { exercise ->
             exercise.sets.any { set ->
@@ -383,6 +406,7 @@ class LiveWorkoutViewModel @Inject constructor(
                 endTime = System.currentTimeMillis(),
                 sets = drafts
             )
+            activeSessionManager.clearSession()
             _uiState.update { it.copy(isFinishing = false) }
             onComplete(sessionId)
         }

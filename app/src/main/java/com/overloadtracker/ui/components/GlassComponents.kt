@@ -98,6 +98,7 @@ fun GlassCard(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(16.dp),
     backgroundColor: Color = GlassBackground,
+    backgroundBrush: Brush? = null,
     borderColor: Color = GlassBorder,
     borderWidth: Dp = 1.dp,
     hasGlow: Boolean = false,
@@ -117,11 +118,17 @@ fun GlassCard(
         Modifier.clickable(onClick = onClick)
     } else Modifier
 
+    val bgModifier = if (backgroundBrush != null) {
+        Modifier.background(backgroundBrush)
+    } else {
+        Modifier.background(backgroundColor)
+    }
+
     Box(
         modifier = modifier
             .then(glowModifier)
             .clip(shape)
-            .background(backgroundColor)
+            .then(bgModifier)
             .border(borderWidth, borderColor, shape)
             .then(clickModifier)
     ) {
