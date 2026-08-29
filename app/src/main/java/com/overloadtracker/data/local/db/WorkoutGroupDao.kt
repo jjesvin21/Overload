@@ -70,6 +70,18 @@ interface WorkoutGroupDao {
     @Query("DELETE FROM group_exercises WHERE groupId = :groupId")
     suspend fun clearGroupExercises(groupId: Long)
 
+    @Query("DELETE FROM group_exercises")
+    suspend fun deleteAllGroupExercises()
+
+    @Query("DELETE FROM workout_groups")
+    suspend fun deleteAllGroups()
+
+    @Query("SELECT * FROM workout_groups ORDER BY id ASC")
+    suspend fun getAllGroupsSync(): List<WorkoutGroup>
+
+    @Query("SELECT * FROM group_exercises WHERE groupId = :groupId ORDER BY sortOrder ASC")
+    suspend fun getGroupExercisesSync(groupId: Long): List<GroupExercise>
+
     @Query("SELECT COALESCE(MAX(sortOrder), -1) FROM group_exercises WHERE groupId = :groupId")
     suspend fun maxSortOrder(groupId: Long): Int
 }

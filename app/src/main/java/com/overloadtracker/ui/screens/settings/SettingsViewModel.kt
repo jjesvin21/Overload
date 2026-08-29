@@ -19,10 +19,19 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import android.content.Context
+import com.overloadtracker.mcp.McpServerManager
+import com.overloadtracker.mcp.McpService
+
 data class SettingsUiState(
     val weightUnit: WeightUnit = WeightUnit.KG,
     val restSeconds: Int = Constants.DEFAULT_REST_SECONDS,
     val themeMode: AppThemeMode = AppThemeMode.SYSTEM,
+    val mcpEnabled: Boolean = false,
+    val mcpPort: Int = 8080,
+    val mcpToken: String = "",
+    val mcpBindLocalOnly: Boolean = false,
+    val mcpIpAddress: String = "127.0.0.1",
     val message: String? = null
 )
 
@@ -33,15 +42,47 @@ data class SettingsUiState(
 class SettingsViewModel @Inject constructor(
     private val prefs: UserPreferencesRepository,
     private val sessionRepository: WorkoutSessionRepository,
-    private val exerciseRepository: ExerciseRepository
+    private val exerciseRepository: ExerciseRepository,
+    private val mcpServerManager: McpServerManager
 ) : ViewModel() {
 
-    val uiState: StateFlow<SettingsUiState> = combine(
+    private val basicPrefs = combine(
         prefs.weightUnit,
         prefs.defaultRestSeconds,
         prefs.themeMode
-    ) { unit, rest, theme ->
-        SettingsUiState(weightUnit = unit, restSeconds = rest, themeMode = theme)
+    ) { unit, rest, theme -> Triple(unit, rest, theme) }
+
+private data class McpPrefsData(
+    val enabled: Boolean,
+    val port: Int,
+    val token: String,
+    val bindLocalOnly: Boolean
+)
+
+    private val mcpPrefs = combine(
+        prefs.mcpEnabled,
+        prefs.mcpPort,
+        prefs.mcpToken,
+        prefs.mcpBindLocalOnly
+    ) { enabled, port, token, localOnly ->
+        McpPrefsData(enabled, port, token, localOnly)
+    }
+
+    val uiState: StateFlow<SettingsUiState> = combine(
+        basicPrefs,
+        mcpPrefs
+    ) { (unit, rest, theme), (mcpEnabled, mcpPort, mcpToken, mcpBindLocalOnly) ->
+        val ip = if (mcpBindLocalOnly) "127.0.0.1" else (mcpServerManager.getLocalIpAddress() ?: "localhost")
+        SettingsUiState(
+            weightUnit = unit,
+            restSeconds = rest,
+            themeMode = theme,
+            mcpEnabled = mcpEnabled,
+            mcpPort = mcpPort,
+            mcpToken = mcpToken,
+            mcpBindLocalOnly = mcpBindLocalOnly,
+            mcpIpAddress = ip
+        )
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
@@ -58,6 +99,42 @@ class SettingsViewModel @Inject constructor(
 
     fun setThemeMode(mode: AppThemeMode) {
         viewModelScope.launch { prefs.setThemeMode(mode) }
+    }
+
+    fun setMcpEnabled(context: Context, enabled: Boolean) {
+        viewModelScope.launch {
+            prefs.setMcpEnabled(enabled)
+            if (enabled) {
+                McpService.startService(context)
+            } else {
+                McpService.stopService(context)
+            }
+        }
+    }
+
+    fun setMcpBindLocalOnly(context: Context, localOnly: Boolean) {
+        viewModelScope.launch {
+            prefs.setMcpBindLocalOnly(localOnly)
+            if (uiState.value.mcpEnabled) {
+                McpService.stopService(context)
+                McpService.startService(context)
+            }
+        }
+    }
+
+    fun regenerateMcpToken(context: Context) {
+        viewModelScope.launch {
+            mcpServerManager.revokeAllSessions()
+            prefs.regenerateMcpToken()
+            if (uiState.value.mcpEnabled) {
+                McpService.stopService(context)
+                McpService.startService(context)
+            }
+        }
+    }
+
+    fun revokeMcpSessions() {
+        mcpServerManager.revokeAllSessions()
     }
 
     fun clearHistory(onDone: () -> Unit = {}) {

@@ -34,6 +34,10 @@ class UserPreferencesRepository @Inject constructor(
         val ONBOARDED = booleanPreferencesKey("onboarded")
         val SEEDED = booleanPreferencesKey("db_seeded")
         val DRAFT = stringPreferencesKey("workout_draft_json")
+        val MCP_ENABLED = booleanPreferencesKey("mcp_enabled")
+        val MCP_PORT = intPreferencesKey("mcp_port")
+        val MCP_TOKEN = stringPreferencesKey("mcp_token")
+        val MCP_BIND_LOCAL_ONLY = booleanPreferencesKey("mcp_bind_local_only")
     }
 
     val weightUnit: Flow<WeightUnit> = context.dataStore.data.map {
@@ -61,6 +65,25 @@ class UserPreferencesRepository @Inject constructor(
 
     val workoutDraft: Flow<String?> = context.dataStore.data.map { it[Keys.DRAFT] }
 
+    val mcpEnabled: Flow<Boolean> = context.dataStore.data.map { it[Keys.MCP_ENABLED] ?: false }
+
+    val mcpPort: Flow<Int> = context.dataStore.data.map { it[Keys.MCP_PORT] ?: 8080 }
+
+    val mcpBindLocalOnly: Flow<Boolean> = context.dataStore.data.map { it[Keys.MCP_BIND_LOCAL_ONLY] ?: true }
+
+    val mcpToken: Flow<String> = context.dataStore.data.map { prefs ->
+        val current = prefs[Keys.MCP_TOKEN]
+        if (current.isNullOrBlank() || current == "overload_mcp_secret_8080") {
+            generateSecureToken()
+        } else {
+            current
+        }
+    }
+
+    private fun generateSecureToken(): String {
+        return "ovld_" + java.util.UUID.randomUUID().toString().replace("-", "").take(24)
+    }
+
     suspend fun setWeightUnit(unit: WeightUnit) {
         context.dataStore.edit { it[Keys.UNIT] = unit.name }
     }
@@ -81,6 +104,28 @@ class UserPreferencesRepository @Inject constructor(
 
     suspend fun setSeeded(value: Boolean) {
         context.dataStore.edit { it[Keys.SEEDED] = value }
+    }
+
+    suspend fun setMcpEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.MCP_ENABLED] = enabled }
+    }
+
+    suspend fun setMcpPort(port: Int) {
+        context.dataStore.edit { it[Keys.MCP_PORT] = port }
+    }
+
+    suspend fun setMcpToken(token: String) {
+        context.dataStore.edit { it[Keys.MCP_TOKEN] = token }
+    }
+
+    suspend fun regenerateMcpToken(): String {
+        val newToken = generateSecureToken()
+        context.dataStore.edit { it[Keys.MCP_TOKEN] = newToken }
+        return newToken
+    }
+
+    suspend fun setMcpBindLocalOnly(localOnly: Boolean) {
+        context.dataStore.edit { it[Keys.MCP_BIND_LOCAL_ONLY] = localOnly }
     }
 
     suspend fun saveDraft(json: String?) {
