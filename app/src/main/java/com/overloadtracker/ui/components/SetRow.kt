@@ -68,6 +68,7 @@ fun SetRow(
     rpe: Int?,
     isCompleted: Boolean,
     isCardio: Boolean = false,
+    isBodyweight: Boolean = false,
     showRpe: Boolean = false,
     onWeightChange: (String) -> Unit = {},
     onRepsChange: (String) -> Unit = {},
@@ -159,19 +160,23 @@ fun SetRow(
         } else {
             // Weight Input Field
             OutlinedTextField(
-                value = weightDisplay,
-                onValueChange = onWeightChange,
-                placeholder = { Text(stringResource(R.string.weight), color = OnSurfaceVariant, fontSize = 12.sp) },
+                value = if (isBodyweight) "BW" else weightDisplay,
+                onValueChange = if (isBodyweight) { {} } else onWeightChange,
+                enabled = !isBodyweight,
+                placeholder = { Text(if (isBodyweight) "BW" else stringResource(R.string.weight), color = OnSurfaceVariant.copy(alpha = 0.5f), fontSize = 12.sp) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = EtchedInputBackground,
                     unfocusedContainerColor = EtchedInputBackground,
+                    disabledContainerColor = EtchedInputBackground.copy(alpha = 0.4f),
                     focusedBorderColor = StravaOrange,
                     unfocusedBorderColor = GlassBorder,
+                    disabledBorderColor = GlassBorder.copy(alpha = 0.3f),
                     focusedTextColor = OnSurface,
-                    unfocusedTextColor = OnSurface
+                    unfocusedTextColor = OnSurface,
+                    disabledTextColor = OnSurfaceVariant.copy(alpha = 0.6f)
                 ),
                 modifier = Modifier.weight(1f)
             )

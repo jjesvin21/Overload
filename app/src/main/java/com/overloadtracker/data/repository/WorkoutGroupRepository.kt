@@ -9,6 +9,7 @@ import com.overloadtracker.data.local.entity.GroupExercise
 import com.overloadtracker.data.local.entity.GroupExerciseCrossRef
 import com.overloadtracker.data.local.entity.WorkoutGroup
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,6 +32,11 @@ class WorkoutGroupRepository @Inject constructor(
         groupDao.getGroupExerciseCrossRefs(groupId)
 
     fun observeExerciseCount(groupId: Long): Flow<Int> = groupDao.observeExerciseCount(groupId)
+
+    fun observeGroupExerciseCounts(): Flow<Map<Long, Int>> =
+        groupDao.observeGroupExerciseCounts().map { list ->
+            list.associate { it.groupId to it.count }
+        }
 
     fun observeLastPerformed(groupId: Long): Flow<Long?> = sessionDao.getLastPerformed(groupId)
 

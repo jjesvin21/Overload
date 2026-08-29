@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -93,16 +94,6 @@ fun MyGroupsScreen(
     val weeklyProgress by viewModel.weeklyProgress.collectAsState()
     val deletedGroup by viewModel.deletedGroup.collectAsState()
     val activeSession by viewModel.activeSession.collectAsState()
-    var currentTimeMillis by remember { mutableStateOf(System.currentTimeMillis()) }
-
-    LaunchedEffect(activeSession != null) {
-        if (activeSession != null) {
-            while (true) {
-                kotlinx.coroutines.delay(1000)
-                currentTimeMillis = System.currentTimeMillis()
-            }
-        }
-    }
 
     val snackbarHostState = remember { SnackbarHostState() }
     var showCreateDialog by remember { mutableStateOf(false) }
@@ -120,10 +111,13 @@ fun MyGroupsScreen(
 
     LaunchedEffect(deletedGroup) {
         if (deletedGroup != null) {
-            val result = snackbarHostState.showSnackbar(
-                message = groupDeletedMessage,
-                actionLabel = undoLabel
-            )
+            val result = kotlinx.coroutines.withTimeoutOrNull(2500L) {
+                snackbarHostState.showSnackbar(
+                    message = groupDeletedMessage,
+                    actionLabel = undoLabel,
+                    duration = androidx.compose.material3.SnackbarDuration.Indefinite
+                )
+            }
             if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
                 viewModel.undoDelete()
             } else {
@@ -205,157 +199,11 @@ fun MyGroupsScreen(
             // Active Session Banner if workout in progress
             item {
                 activeSession?.let { session ->
-                    val elapsedText = formatDuration(currentTimeMillis - session.startTime)
-                    val completedSetsCount = session.exercises.sumOf { ex -> ex.sets.count { it.isCompleted } }
-                    val totalSetsCount = session.exercises.sumOf { it.sets.size }
-
-                    GlassCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = { onStartWorkout(session.groupId) },
-                        hasGlow = true,
-                        shape = RoundedCornerShape(20.dp),
-                        backgroundBrush = Brush.linearGradient(
-                            colors = listOf(
-                                Color(0xFFFF4500),
-                                Color(0xFFFF6D00),
-                                Color(0xFFE63900)
-                            )
-                        ),
-                        borderColor = Color.White.copy(alpha = 0.35f),
-                        borderWidth = 1.dp
-                    ) {
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            // Glass shine top highlight overlay
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(44.dp)
-                                    .background(
-                                        Brush.verticalGradient(
-                                            colors = listOf(
-                                                Color.White.copy(alpha = 0.22f),
-                                                Color.Transparent
-                                            )
-                                        )
-                                    )
-                            )
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 18.dp, vertical = 16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(8.dp)
-                                                .clip(CircleShape)
-                                                .background(Color.White)
-                                        )
-                                        Text(
-                                            text = "WORKOUT IN PROGRESS",
-                                            style = LabelCaps.copy(
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                letterSpacing = 0.8.sp
-                                            ),
-                                            color = Color.White
-                                        )
-                                        Text(
-                                            text = "•",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = Color.White.copy(alpha = 0.8f)
-                                        )
-                                        Text(
-                                            text = elapsedText,
-                                            style = MaterialTheme.typography.bodyMedium.copy(
-                                                fontWeight = FontWeight.Bold
-                                            ),
-                                            color = Color.White
-                                        )
-                                    }
-
-                                    Text(
-                                        text = session.groupName.ifBlank { "Live Session" },
-                                        style = MaterialTheme.typography.titleLarge.copy(
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 20.sp
-                                        ),
-                                        color = Color.White,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "${session.exercises.size} exercises",
-                                            style = MaterialTheme.typography.bodySmall.copy(
-                                                fontWeight = FontWeight.Medium
-                                            ),
-                                            color = Color.White.copy(alpha = 0.9f)
-                                        )
-                                        if (totalSetsCount > 0) {
-                                            Text(
-                                                text = "•",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = Color.White.copy(alpha = 0.8f)
-                                            )
-                                            Text(
-                                                text = "$completedSetsCount/$totalSetsCount sets done",
-                                                style = MaterialTheme.typography.bodySmall.copy(
-                                                    fontWeight = FontWeight.Bold
-                                                ),
-                                                color = Color.White
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Spacer(Modifier.width(12.dp))
-
-                                Box(
-                                    modifier = Modifier
-                                        .shadow(8.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.3f))
-                                        .clip(CircleShape)
-                                        .background(Color.White)
-                                        .padding(horizontal = 18.dp, vertical = 10.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Text(
-                                            text = "Resume",
-                                            style = LabelCaps.copy(
-                                                fontWeight = FontWeight.ExtraBold,
-                                                fontSize = 12.sp
-                                            ),
-                                            color = TrueBlack
-                                        )
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                            contentDescription = null,
-                                            tint = TrueBlack,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    ActiveSessionBannerCard(
+                        session = session,
+                        onResume = { onStartWorkout(session.groupId) },
+                        onDiscard = { viewModel.discardActiveSession() }
+                    )
                 }
             }
 
@@ -625,10 +473,11 @@ fun MyGroupsScreen(
                     onClick = {
                         val idToStart = targetId
                         pendingGroupIdToStart = null
+                        viewModel.discardActiveSession()
                         onStartWorkout(idToStart)
                     }
                 ) {
-                    Text("Discard & Start New", color = StravaOrange)
+                    Text("Discard & Start New", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
@@ -685,9 +534,9 @@ private fun GroupCard(
                     color = OnSurface
                 )
                 Text(
-                    text = "${item.exerciseCount} exercises",
+                    text = if (item.exerciseCount == 0) "No exercises added in split" else "${item.exerciseCount} exercises",
                     style = LabelCaps,
-                    color = StravaOrange
+                    color = if (item.exerciseCount == 0) SecondaryText else StravaOrange
                 )
                 item.lastPerformed?.let { ts ->
                     val fmt = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
@@ -762,4 +611,264 @@ private fun CreateGroupDialog(
             }
         }
     )
+}
+
+@Composable
+private fun ActiveSessionBannerCard(
+    session: com.overloadtracker.data.manager.ActiveWorkoutSession,
+    onResume: () -> Unit,
+    onDiscard: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var currentTimeMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+    var showDiscardDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(session.startTime) {
+        while (true) {
+            kotlinx.coroutines.delay(1000)
+            currentTimeMillis = System.currentTimeMillis()
+        }
+    }
+
+    val elapsedText = remember(currentTimeMillis, session.startTime) {
+        formatDuration(currentTimeMillis - session.startTime)
+    }
+    val completedSetsCount = remember(session.exercises) {
+        session.exercises.sumOf { ex -> ex.sets.count { it.isCompleted } }
+    }
+    val totalSetsCount = remember(session.exercises) {
+        session.exercises.sumOf { it.sets.size }
+    }
+
+    val backgroundBrush = remember {
+        Brush.linearGradient(
+            colors = listOf(
+                Color(0xFFFF4500),
+                Color(0xFFFF6D00),
+                Color(0xFFE63900)
+            )
+        )
+    }
+    val shineBrush = remember {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color.White.copy(alpha = 0.22f),
+                Color.Transparent
+            )
+        )
+    }
+
+    GlassCard(
+        modifier = modifier.fillMaxWidth(),
+        onClick = onResume,
+        hasGlow = true,
+        shape = RoundedCornerShape(20.dp),
+        backgroundBrush = backgroundBrush,
+        borderColor = Color.White.copy(alpha = 0.35f),
+        borderWidth = 1.dp
+    ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .background(shineBrush)
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                // Top Row: Status badge & Horizontal Timer
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(Color.White)
+                        )
+                        Text(
+                            text = "WORKOUT IN PROGRESS",
+                            style = LabelCaps.copy(
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 0.8.sp
+                            ),
+                            color = Color.White,
+                            maxLines = 1
+                        )
+                    }
+
+                    // Horizontal Timer Badge
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.25f))
+                            .border(0.5.dp, Color.White.copy(alpha = 0.3f), CircleShape)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = elapsedText,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp
+                            ),
+                            color = Color.White,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
+                }
+
+                // Middle Section: Workout Details (Title & Exercise/Set Counters)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = session.groupName.ifBlank { "Live Session" },
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 20.sp
+                        ),
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "${session.exercises.size} exercises",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                        if (totalSetsCount > 0) {
+                            Text(
+                                text = "•",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.8f)
+                            )
+                            Text(
+                                text = "$completedSetsCount/$totalSetsCount sets",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+
+                // Bottom Row: Equal-Sized Cancel & Resume Buttons Side-by-Side
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Cancel / Discard Button (Dark Glass / Red Tint)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(42.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.35f))
+                            .border(1.dp, Color.White.copy(alpha = 0.25f), CircleShape)
+                            .clickable { showDiscardDialog = true },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = stringResource(R.string.discard_workout),
+                                tint = Color(0xFFFF6B6B),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "Cancel",
+                                style = LabelCaps.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp
+                                ),
+                                color = Color.White
+                            )
+                        }
+                    }
+
+                    // Resume Button (White Pill)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(42.dp)
+                            .shadow(6.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.3f))
+                            .clip(CircleShape)
+                            .background(Color.White)
+                            .clickable(onClick = onResume),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = "Resume",
+                                style = LabelCaps.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 13.sp
+                                ),
+                                color = TrueBlack
+                            )
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null,
+                                tint = TrueBlack,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            containerColor = Charcoal,
+            titleContentColor = OnSurface,
+            textContentColor = OnSurfaceVariant,
+            title = { Text(stringResource(R.string.discard_confirm_title)) },
+            text = { Text(stringResource(R.string.discard_confirm_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDiscardDialog = false
+                    onDiscard()
+                }) {
+                    Text(stringResource(R.string.discard_workout), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardDialog = false }) {
+                    Text(stringResource(R.string.cancel), color = OnSurfaceVariant)
+                }
+            }
+        )
+    }
 }

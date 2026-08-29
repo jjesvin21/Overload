@@ -15,8 +15,16 @@ import com.overloadtracker.data.local.entity.GroupExerciseCrossRef
 import com.overloadtracker.data.local.entity.WorkoutGroup
 import kotlinx.coroutines.flow.Flow
 
+data class GroupExerciseCount(
+    val groupId: Long,
+    val count: Int
+)
+
 @Dao
 interface WorkoutGroupDao {
+
+    @Query("SELECT groupId, COUNT(*) as count FROM group_exercises GROUP BY groupId")
+    fun observeGroupExerciseCounts(): Flow<List<GroupExerciseCount>>
 
     @Query("SELECT * FROM workout_groups ORDER BY createdAt DESC")
     fun getAllGroups(): Flow<List<WorkoutGroup>>

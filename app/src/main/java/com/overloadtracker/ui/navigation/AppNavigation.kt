@@ -17,6 +17,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -132,7 +137,11 @@ fun AppNavigation(
             NavHost(
                 navController = navController,
                 startDestination = startDestination,
-                modifier = Modifier.padding(padding)
+                modifier = Modifier.padding(padding),
+                enterTransition = { fadeIn(animationSpec = tween(200)) + slideInHorizontally(animationSpec = tween(200)) { fullWidth -> fullWidth / 4 } },
+                exitTransition = { fadeOut(animationSpec = tween(150)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(150)) },
+                popExitTransition = { fadeOut(animationSpec = tween(200)) + slideOutHorizontally(animationSpec = tween(200)) { fullWidth -> fullWidth / 4 } }
             ) {
                 composable<OnboardingRoute> {
                     OnboardingScreen(onComplete = {

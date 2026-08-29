@@ -51,6 +51,20 @@ fun AtmosphericBackground(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
 ) {
+    val topGlowColors = androidx.compose.runtime.remember {
+        listOf(
+            StravaOrange.copy(alpha = 0.15f),
+            StravaOrange.copy(alpha = 0.05f),
+            Color.Transparent
+        )
+    }
+    val bottomGlowColors = androidx.compose.runtime.remember {
+        listOf(
+            Color(0xFF393939).copy(alpha = 0.12f),
+            Color.Transparent
+        )
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -60,11 +74,7 @@ fun AtmosphericBackground(
             // Top-left orange ambient glow
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(
-                        StravaOrange.copy(alpha = 0.15f),
-                        StravaOrange.copy(alpha = 0.05f),
-                        Color.Transparent
-                    ),
+                    colors = topGlowColors,
                     center = Offset(size.width * 0.1f, size.height * 0.1f),
                     radius = size.width * 0.6f
                 ),
@@ -75,10 +85,7 @@ fun AtmosphericBackground(
             // Bottom-right subtle secondary glow
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFF393939).copy(alpha = 0.12f),
-                        Color.Transparent
-                    ),
+                    colors = bottomGlowColors,
                     center = Offset(size.width * 0.9f, size.height * 0.85f),
                     radius = size.width * 0.7f
                 ),

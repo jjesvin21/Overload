@@ -61,30 +61,22 @@ class GroupsViewModel @Inject constructor(
     val deletedGroup: StateFlow<WorkoutGroup?> = _deletedGroup.asStateFlow()
     val activeSession = activeSessionManager.activeSession
 
-    val groups: StateFlow<List<GroupItemUi>> = groupRepository.observeGroups()
-        .flatMapLatest { groupList ->
-            if (groupList.isEmpty()) {
-                flowOf(emptyList())
-            } else {
-                combine(
-                    groupList.map { group ->
-                        combine(
-                            groupRepository.observeExerciseCount(group.id),
-                            groupRepository.observeLastPerformed(group.id)
-                        ) { count, last ->
-                            GroupItemUi(group, count, last)
-                        }
-                    }
-                ) { items -> items.toList() }
-            }
-        }
-        .map { list ->
-            list.sortedWith(
-                compareBy<GroupItemUi> { it.lastPerformed ?: 0L }
-                    .thenBy { it.group.createdAt }
+    val groups: StateFlow<List<GroupItemUi>> = combine(
+        groupRepository.observeGroups(),
+        groupRepository.observeGroupExerciseCounts(),
+        sessionRepository.observeGroupLastPerformedMap()
+    ) { groupList, countsMap, lastMap ->
+        groupList.map { group ->
+            GroupItemUi(
+                group = group,
+                exerciseCount = countsMap[group.id] ?: 0,
+                lastPerformed = lastMap[group.id]
             )
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        }.sortedWith(
+            compareBy<GroupItemUi> { it.lastPerformed ?: 0L }
+                .thenBy { it.group.createdAt }
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val weeklyProgress: StateFlow<WeeklyProgressUi> = sessionRepository.observeSessions()
         .map { sessions -> calculateWeeklyProgress(sessions) }
@@ -117,6 +109,10 @@ class GroupsViewModel @Inject constructor(
 
     fun clearDeleted() {
         _deletedGroup.value = null
+    }
+
+    fun discardActiveSession() {
+        activeSessionManager.clearSession()
     }
 
     private fun calculateWeeklyProgress(sessions: List<WorkoutSession>): WeeklyProgressUi {

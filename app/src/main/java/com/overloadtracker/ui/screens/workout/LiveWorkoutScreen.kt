@@ -27,10 +27,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -58,9 +61,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.overloadtracker.R
 import com.overloadtracker.ui.components.GlassCard
@@ -145,6 +149,13 @@ fun LiveWorkoutScreen(
                         }
                     },
                     actions = {
+                        IconButton(onClick = { showDiscardDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = stringResource(R.string.discard_workout),
+                                tint = OnSurfaceVariant
+                            )
+                        }
                         Box(
                             modifier = Modifier
                                 .padding(end = 12.dp)
@@ -186,31 +197,39 @@ fun LiveWorkoutScreen(
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(uiState.exercises, key = { it.exerciseId }) { exercise ->
-                    ExerciseSection(
-                        exercise = exercise,
-                        onToggleExpand = { viewModel.toggleExpanded(exercise.exerciseId) },
-                        onSelectExercise = { viewModel.selectExerciseDetail(exercise.exerciseId) },
-                        onWeightChange = { setNum, value ->
-                            viewModel.updateWeight(exercise.exerciseId, setNum, value)
-                        },
-                        onRepsChange = { setNum, value ->
-                            viewModel.updateReps(exercise.exerciseId, setNum, value)
-                        },
-                        onTimeChange = { setNum, value ->
-                            viewModel.updateTime(exercise.exerciseId, setNum, value)
-                        },
-                        onCountChange = { setNum, value ->
-                            viewModel.updateCount(exercise.exerciseId, setNum, value)
-                        },
-                        onRpeChange = { setNum, rpe ->
-                            viewModel.updateRpe(exercise.exerciseId, setNum, rpe)
-                        },
-                        onCompleteChange = { setNum, done ->
-                            viewModel.toggleSetComplete(exercise.exerciseId, setNum, done)
-                        },
-                        onAddSet = { viewModel.addSet(exercise.exerciseId) }
-                    )
+                if (uiState.exercises.isEmpty()) {
+                    item {
+                        EmptySplitExercisesCard(
+                            onAddExerciseClick = { showAddExercise = true }
+                        )
+                    }
+                } else {
+                    items(uiState.exercises, key = { it.exerciseId }) { exercise ->
+                        ExerciseSection(
+                            exercise = exercise,
+                            onToggleExpand = { viewModel.toggleExpanded(exercise.exerciseId) },
+                            onSelectExercise = { viewModel.selectExerciseDetail(exercise.exerciseId) },
+                            onWeightChange = { setNum, value ->
+                                viewModel.updateWeight(exercise.exerciseId, setNum, value)
+                            },
+                            onRepsChange = { setNum, value ->
+                                viewModel.updateReps(exercise.exerciseId, setNum, value)
+                            },
+                            onTimeChange = { setNum, value ->
+                                viewModel.updateTime(exercise.exerciseId, setNum, value)
+                            },
+                            onCountChange = { setNum, value ->
+                                viewModel.updateCount(exercise.exerciseId, setNum, value)
+                            },
+                            onRpeChange = { setNum, rpe ->
+                                viewModel.updateRpe(exercise.exerciseId, setNum, rpe)
+                            },
+                            onCompleteChange = { setNum, done ->
+                                viewModel.toggleSetComplete(exercise.exerciseId, setNum, done)
+                            },
+                            onAddSet = { viewModel.addSet(exercise.exerciseId) }
+                        )
+                    }
                 }
 
                 item {
@@ -239,7 +258,7 @@ fun LiveWorkoutScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showDiscardDialog = false
-                    onDiscard()
+                    viewModel.discardWorkout { onDiscard() }
                 }) {
                     Text(stringResource(R.string.confirm), color = StravaOrange)
                 }
@@ -419,7 +438,7 @@ private fun ExerciseSection(
                             Text(stringResource(R.string.cardio_time_short).uppercase(), style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(1f))
                             Text(stringResource(R.string.cardio_count).uppercase(), style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(1f))
                         } else {
-                            Text("WEIGHT", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(1f))
+                            Text("WEIGHT", style = LabelCaps.copy(fontSize = 10.sp), color = if (exercise.isBodyweight) SecondaryText.copy(alpha = 0.4f) else SecondaryText, modifier = Modifier.weight(1f))
                             Text("REPS", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(1f))
                         }
                         Text("", modifier = Modifier.size(36.dp))
@@ -430,6 +449,7 @@ private fun ExerciseSection(
                         SetRow(
                             setNumber = set.setNumber,
                             isCardio = exercise.isCardio,
+                            isBodyweight = exercise.isBodyweight,
                             weightDisplay = set.weightDisplay,
                             repsDisplay = set.repsDisplay,
                             timeDisplay = set.timeDisplay,
@@ -474,6 +494,79 @@ private fun ExerciseSection(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptySplitExercisesCard(
+    onAddExerciseClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    GlassCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(StravaOrange.copy(alpha = 0.15f))
+                    .border(1.dp, StravaOrange.copy(alpha = 0.3f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.FitnessCenter,
+                    contentDescription = null,
+                    tint = StravaOrange,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            Text(
+                text = "No Exercises in Split",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = OnSurface,
+                textAlign = TextAlign.Center
+            )
+
+            Text(
+                text = "No exercises were added to this split routine yet. Tap below to add exercises to your workout.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = OnSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(4.dp))
+
+            Button(
+                onClick = onAddExerciseClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = StravaOrange,
+                    contentColor = TrueBlack
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = "Add Exercises",
+                    style = LabelCaps.copy(fontWeight = FontWeight.Bold)
+                )
             }
         }
     }
