@@ -105,7 +105,7 @@ class GroupEditorViewModel @Inject constructor(
 
     fun moveUp(index: Int, items: List<GroupExerciseCrossRef>) {
         if (index <= 0) return
-        val ids = items.mapNotNull { it.exercise?.id ?: it.crossRef.exerciseId }.toMutableList()
+        val ids = items.map { it.exercise.id }.toMutableList()
         val tmp = ids[index - 1]
         ids[index - 1] = ids[index]
         ids[index] = tmp
@@ -114,13 +114,12 @@ class GroupEditorViewModel @Inject constructor(
 
     fun moveDown(index: Int, items: List<GroupExerciseCrossRef>) {
         if (index >= items.lastIndex) return
-        val ids = items.mapNotNull { it.exercise?.id ?: it.crossRef.exerciseId }.toMutableList()
+        val ids = items.map { it.exercise.id }.toMutableList()
         val tmp = ids[index + 1]
         ids[index + 1] = ids[index]
         ids[index] = tmp
         viewModelScope.launch { groupRepository.reorder(groupId, ids) }
     }
-
     fun deleteGroup(onDeleted: () -> Unit) {
         viewModelScope.launch {
             groupRepository.deleteGroup(groupId)
@@ -243,9 +242,7 @@ fun GroupEditorScreen(
                 modifier = Modifier.fillMaxWidth()
             )
             LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                itemsIndexed(exercises, key = { _, item -> item.crossRef.exerciseId }) { index, item ->
-                    val exId = item.exercise?.id ?: item.crossRef.exerciseId
-                    val exName = item.exercise?.name ?: "Unknown Exercise"
+                itemsIndexed(exercises, key = { _, item -> item.exercise.id }) { index, item ->
                     GlassCard(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp)
@@ -258,7 +255,7 @@ fun GroupEditorScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = exName,
+                                text = item.exercise.name,
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = OnSurface,
                                 modifier = Modifier.weight(1f)
@@ -283,7 +280,7 @@ fun GroupEditorScreen(
                                     tint = if (index < exercises.lastIndex) StravaOrange else OnSurfaceVariant.copy(alpha = 0.3f)
                                 )
                             }
-                            IconButton(onClick = { viewModel.removeExercise(exId) }) {
+                            IconButton(onClick = { viewModel.removeExercise(item.exercise.id) }) {
                                 Icon(
                                     Icons.Default.Delete,
                                     contentDescription = stringResource(R.string.delete),
@@ -293,7 +290,6 @@ fun GroupEditorScreen(
                         }
                     }
                 }
-
             }
         }
     }

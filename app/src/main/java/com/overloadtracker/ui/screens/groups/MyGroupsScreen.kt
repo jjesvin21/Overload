@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -58,6 +59,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import com.overloadtracker.util.formatDuration
+
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -88,10 +92,31 @@ fun MyGroupsScreen(
     val groups by viewModel.groups.collectAsState()
     val weeklyProgress by viewModel.weeklyProgress.collectAsState()
     val deletedGroup by viewModel.deletedGroup.collectAsState()
+    val activeSession by viewModel.activeSession.collectAsState()
+    var currentTimeMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+
+    LaunchedEffect(activeSession != null) {
+        if (activeSession != null) {
+            while (true) {
+                kotlinx.coroutines.delay(1000)
+                currentTimeMillis = System.currentTimeMillis()
+            }
+        }
+    }
+
     val snackbarHostState = remember { SnackbarHostState() }
     var showCreateDialog by remember { mutableStateOf(false) }
+    var pendingGroupIdToStart by remember { mutableStateOf<Long?>(null) }
     val groupDeletedMessage = stringResource(R.string.group_deleted)
     val undoLabel = stringResource(R.string.undo)
+
+    fun requestStartWorkout(targetGroupId: Long) {
+        if (activeSession != null && activeSession?.groupId != targetGroupId) {
+            pendingGroupIdToStart = targetGroupId
+        } else {
+            onStartWorkout(targetGroupId)
+        }
+    }
 
     LaunchedEffect(deletedGroup) {
         if (deletedGroup != null) {
@@ -177,6 +202,164 @@ fun MyGroupsScreen(
                 }
             }
 
+            // Active Session Banner if workout in progress
+            item {
+                activeSession?.let { session ->
+                    val elapsedText = formatDuration(currentTimeMillis - session.startTime)
+                    val completedSetsCount = session.exercises.sumOf { ex -> ex.sets.count { it.isCompleted } }
+                    val totalSetsCount = session.exercises.sumOf { it.sets.size }
+
+                    GlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { onStartWorkout(session.groupId) },
+                        hasGlow = true,
+                        shape = RoundedCornerShape(20.dp),
+                        backgroundBrush = Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFFFF4500),
+                                Color(0xFFFF6D00),
+                                Color(0xFFE63900)
+                            )
+                        ),
+                        borderColor = Color.White.copy(alpha = 0.35f),
+                        borderWidth = 1.dp
+                    ) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            // Glass shine top highlight overlay
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(44.dp)
+                                    .background(
+                                        Brush.verticalGradient(
+                                            colors = listOf(
+                                                Color.White.copy(alpha = 0.22f),
+                                                Color.Transparent
+                                            )
+                                        )
+                                    )
+                            )
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 18.dp, vertical = 16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(8.dp)
+                                                .clip(CircleShape)
+                                                .background(Color.White)
+                                        )
+                                        Text(
+                                            text = "WORKOUT IN PROGRESS",
+                                            style = LabelCaps.copy(
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.ExtraBold,
+                                                letterSpacing = 0.8.sp
+                                            ),
+                                            color = Color.White
+                                        )
+                                        Text(
+                                            text = "•",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color.White.copy(alpha = 0.8f)
+                                        )
+                                        Text(
+                                            text = elapsedText,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = Color.White
+                                        )
+                                    }
+
+                                    Text(
+                                        text = session.groupName.ifBlank { "Live Session" },
+                                        style = MaterialTheme.typography.titleLarge.copy(
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 20.sp
+                                        ),
+                                        color = Color.White,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "${session.exercises.size} exercises",
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                fontWeight = FontWeight.Medium
+                                            ),
+                                            color = Color.White.copy(alpha = 0.9f)
+                                        )
+                                        if (totalSetsCount > 0) {
+                                            Text(
+                                                text = "•",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = Color.White.copy(alpha = 0.8f)
+                                            )
+                                            Text(
+                                                text = "$completedSetsCount/$totalSetsCount sets done",
+                                                style = MaterialTheme.typography.bodySmall.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = Color.White
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Spacer(Modifier.width(12.dp))
+
+                                Box(
+                                    modifier = Modifier
+                                        .shadow(8.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.3f))
+                                        .clip(CircleShape)
+                                        .background(Color.White)
+                                        .padding(horizontal = 18.dp, vertical = 10.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Text(
+                                            text = "Resume",
+                                            style = LabelCaps.copy(
+                                                fontWeight = FontWeight.ExtraBold,
+                                                fontSize = 12.sp
+                                            ),
+                                            color = TrueBlack
+                                        )
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                            contentDescription = null,
+                                            tint = TrueBlack,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+
             // Today's Focus / Quick Start Card
             item {
                 val topGroup = groups.firstOrNull()
@@ -240,7 +423,7 @@ fun MyGroupsScreen(
                                     .clip(RoundedCornerShape(28.dp))
                                     .background(StravaOrange)
                                     .clickable {
-                                        topGroup?.group?.id?.let { onStartWorkout(it) }
+                                        topGroup?.group?.id?.let { requestStartWorkout(it) }
                                     },
                                 contentAlignment = Alignment.Center
                             ) {
@@ -403,7 +586,7 @@ fun MyGroupsScreen(
                     GroupCard(
                         item = item,
                         isPrimary = index == 0,
-                        onStart = { onStartWorkout(item.group.id) },
+                        onStart = { requestStartWorkout(item.group.id) },
                         onEdit = { onEditGroup(item.group.id) },
                         onDelete = { viewModel.deleteGroup(item.group) },
                         modifier = Modifier.animateItem()
@@ -423,6 +606,35 @@ fun MyGroupsScreen(
             onCreate = { name, notes ->
                 viewModel.createGroup(name, notes)
                 showCreateDialog = false
+            }
+        )
+    }
+
+    pendingGroupIdToStart?.let { targetId ->
+        AlertDialog(
+            onDismissRequest = { pendingGroupIdToStart = null },
+            containerColor = Charcoal,
+            titleContentColor = OnSurface,
+            textContentColor = OnSurfaceVariant,
+            title = { Text("Active Workout Session In Progress") },
+            text = {
+                Text("You have an active workout session running. Starting a new session will discard your current progress. Do you want to replace it?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val idToStart = targetId
+                        pendingGroupIdToStart = null
+                        onStartWorkout(idToStart)
+                    }
+                ) {
+                    Text("Discard & Start New", color = StravaOrange)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingGroupIdToStart = null }) {
+                    Text("Cancel", color = OnSurfaceVariant)
+                }
             }
         )
     }

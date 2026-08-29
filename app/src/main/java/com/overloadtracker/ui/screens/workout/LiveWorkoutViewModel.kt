@@ -80,11 +80,12 @@ class LiveWorkoutViewModel @Inject constructor(
     private val groupRepository: WorkoutGroupRepository,
     private val exerciseRepository: ExerciseRepository,
     private val sessionRepository: WorkoutSessionRepository,
-    private val prefs: UserPreferencesRepository
+    private val prefs: UserPreferencesRepository,
+    private val activeSessionManager: com.overloadtracker.data.manager.ActiveSessionManager
 ) : ViewModel() {
 
     private val groupId: Long = savedStateHandle.toRoute<LiveWorkoutRoute>().groupId
-    private val startTime = System.currentTimeMillis()
+    private var startTime: Long = System.currentTimeMillis()
 
     private val _uiState = MutableStateFlow(
         LiveWorkoutUiState(groupId = groupId)
@@ -95,13 +96,23 @@ class LiveWorkoutViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeightUnit.KG)
 
     init {
+        val existing = activeSessionManager.activeSession.value
+        if (existing != null && existing.groupId == groupId) {
+            startTime = existing.startTime
+        } else {
+            startTime = System.currentTimeMillis()
+            activeSessionManager.startSession(groupId, "", startTime)
+        }
+
         viewModelScope.launch {
             val unit = prefs.weightUnit.first()
             val rest = prefs.defaultRestSeconds.first()
             _uiState.update { it.copy(weightUnit = unit, defaultRestSeconds = rest, restTotalSeconds = rest) }
 
             val group = groupRepository.getGroup(groupId)
-            _uiState.update { it.copy(groupName = group?.name.orEmpty()) }
+            val name = group?.name.orEmpty()
+            _uiState.update { it.copy(groupName = name) }
+            activeSessionManager.updateGroupName(name)
 
             groupRepository.observeGroupExercises(groupId).collect { refs ->
                 loadExercises(refs, unit)
@@ -120,14 +131,13 @@ class LiveWorkoutViewModel @Inject constructor(
 
     private suspend fun loadExercises(refs: List<GroupExerciseCrossRef>, unit: WeightUnit) {
         val current = _uiState.value.exercises.associateBy { it.exerciseId }
-        val exercises = refs.mapNotNull { ref ->
-            val ex = ref.exercise ?: return@mapNotNull null
-            val existing = current[ex.id]
+        val exercises = refs.map { ref ->
+            val existing = current[ref.exercise.id]
             if (existing != null) {
                 existing
             } else {
-                val isCardio = ex.category.equals("cardio", ignoreCase = true)
-                val last = sessionRepository.getLastSet(ex.id)
+                val isCardio = ref.exercise.category.equals("cardio", ignoreCase = true)
+                val last = sessionRepository.getLastSet(ref.exercise.id)
                 val prevLabel = last?.let { info ->
                     if (isCardio) {
                         formatCardioDisplay(info.timeSeconds, info.count)
@@ -137,8 +147,8 @@ class LiveWorkoutViewModel @Inject constructor(
                     }
                 }
                 LiveExercise(
-                    exerciseId = ex.id,
-                    exerciseName = ex.name,
+                    exerciseId = ref.exercise.id,
+                    exerciseName = ref.exercise.name,
                     isCardio = isCardio,
                     sets = (1..3).map { defaultSet(it, last, unit, isCardio) },
                     prevBestLabel = prevLabel
@@ -147,7 +157,6 @@ class LiveWorkoutViewModel @Inject constructor(
         }
         _uiState.update { it.copy(exercises = exercises) }
     }
-
 
     private fun defaultSet(
         number: Int,
@@ -397,6 +406,7 @@ class LiveWorkoutViewModel @Inject constructor(
                 endTime = System.currentTimeMillis(),
                 sets = drafts
             )
+            activeSessionManager.clearSession()
             _uiState.update { it.copy(isFinishing = false) }
             onComplete(sessionId)
         }
