@@ -87,6 +87,8 @@ import javax.inject.Inject
 
 import androidx.compose.material.icons.filled.Share
 
+import com.overloadtracker.util.formatCardioDisplay
+
 @HiltViewModel
 class SessionDetailViewModel @Inject constructor(
     savedStateHandle: androidx.lifecycle.SavedStateHandle,
@@ -102,6 +104,7 @@ class SessionDetailViewModel @Inject constructor(
     private val prCache = mutableMapOf<String, Double?>()
 
     suspend fun isPr(set: SessionSet): Boolean {
+        if ((set.timeSeconds ?: 0) > 0 || (set.count ?: 0) > 0) return false
         val pr = prCache.getOrPut(set.exerciseId) {
             sessionRepository.getPRWeight(set.exerciseId)
         }
@@ -321,8 +324,14 @@ private fun SetDetailRow(set: SessionSet, isPr: Boolean) {
                     color = SecondaryText
                 )
                 Spacer(Modifier.height(2.dp))
+                val isCardio = (set.timeSeconds ?: 0) > 0 || (set.count ?: 0) > 0
+                val displayText = if (isCardio) {
+                    formatCardioDisplay(set.timeSeconds, set.count)
+                } else {
+                    "${WeightUtils.formatWeight(set.weight, WeightUnit.KG)} × ${set.reps}"
+                }
                 Text(
-                    text = "${WeightUtils.formatWeight(set.weight, WeightUnit.KG)} × ${set.reps}",
+                    text = displayText,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = OnSurface
                 )
@@ -357,3 +366,4 @@ private fun SetDetailRow(set: SessionSet, isPr: Boolean) {
         }
     }
 }
+

@@ -50,7 +50,7 @@ interface WorkoutSessionDao {
 
     @Query(
         """
-        SELECT weight AS weight, reps AS reps
+        SELECT weight AS weight, reps AS reps, timeSeconds AS timeSeconds, count AS count
         FROM session_sets
         WHERE exerciseId = :exerciseId AND isCompleted = 1
         ORDER BY sessionId DESC, setNumber DESC
@@ -58,6 +58,7 @@ interface WorkoutSessionDao {
         """
     )
     suspend fun getLastSet(exerciseId: String): PreviousSetInfo?
+
 
     @Query(
         """

@@ -160,9 +160,12 @@ class McpServerManager @Inject constructor(
                                         setNumber = s.setNumber,
                                         weight = s.weight,
                                         reps = s.reps,
+                                        timeSeconds = s.timeSeconds,
+                                        count = s.count,
                                         rpe = s.rpe,
                                         restSeconds = s.restSeconds
                                     )
+
                                 }
                                 val muscleGroups = sets.mapNotNull { allExercises[it.exerciseId]?.category }.distinct()
                                 McpWorkoutSessionDto(

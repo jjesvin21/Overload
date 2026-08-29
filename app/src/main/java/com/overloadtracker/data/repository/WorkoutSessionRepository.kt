@@ -105,6 +105,8 @@ class WorkoutSessionRepository @Inject constructor(
                 setNumber = it.setNumber,
                 weight = it.weight,
                 reps = it.reps,
+                timeSeconds = it.timeSeconds,
+                count = it.count,
                 rpe = it.rpe,
                 isCompleted = true,
                 restSeconds = it.restSeconds
@@ -140,6 +142,8 @@ class WorkoutSessionRepository @Inject constructor(
                     setNumber = set.setNumber,
                     weightKg = set.weight,
                     reps = set.reps,
+                    timeSeconds = set.timeSeconds,
+                    count = set.count,
                     rpe = set.rpe,
                     totalVolume = set.weight * set.reps,
                     notes = sws.session.notes.orEmpty()
@@ -175,7 +179,10 @@ data class SessionSetDraft(
     val setNumber: Int,
     val weight: Double,
     val reps: Int,
+    val timeSeconds: Int? = null,
+    val count: Int? = null,
     val rpe: Int?,
     val isCompleted: Boolean,
     val restSeconds: Int?
 )
+

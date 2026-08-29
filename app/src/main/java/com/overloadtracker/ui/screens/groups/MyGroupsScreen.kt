@@ -41,11 +41,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -403,7 +400,7 @@ fun MyGroupsScreen(
                 }
             } else {
                 itemsIndexed(groups, key = { _, item -> item.group.id }) { index, item ->
-                    GroupSwipeCard(
+                    GroupCard(
                         item = item,
                         isPrimary = index == 0,
                         onStart = { onStartWorkout(item.group.id) },
@@ -431,9 +428,8 @@ fun MyGroupsScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun GroupSwipeCard(
+private fun GroupCard(
     item: GroupItemUi,
     isPrimary: Boolean,
     onStart: () -> Unit,
@@ -441,97 +437,69 @@ private fun GroupSwipeCard(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.EndToStart) {
-                onDelete()
-                true
-            } else false
-        }
-    )
-    SwipeToDismissBox(
-        state = dismissState,
-        modifier = modifier,
-        backgroundContent = {
+    GlassCard(
+        modifier = modifier.fillMaxWidth(),
+        onClick = onStart,
+        shape = RoundedCornerShape(16.dp),
+        backgroundColor = Charcoal,
+        hasGlow = isPrimary
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .heightIn(min = 48.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.CenterEnd
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(SurfaceContainerHighest),
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete),
-                    tint = MaterialTheme.colorScheme.error
+                    imageVector = Icons.Default.FitnessCenter,
+                    contentDescription = null,
+                    tint = StravaOrange,
+                    modifier = Modifier.size(24.dp)
                 )
             }
-        },
-        enableDismissFromStartToEnd = false
-    ) {
-        GlassCard(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = onStart,
-            shape = RoundedCornerShape(16.dp),
-            backgroundColor = Charcoal,
-            hasGlow = isPrimary
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .heightIn(min = 48.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(SurfaceContainerHighest),
-                    contentAlignment = Alignment.Center
-                ) {
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = item.group.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = OnSurface
+                )
+                Text(
+                    text = "${item.exerciseCount} exercises",
+                    style = LabelCaps,
+                    color = StravaOrange
+                )
+                item.lastPerformed?.let { ts ->
+                    val fmt = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+                    Text(
+                        text = "Last: ${fmt.format(Date(ts))}",
+                        style = LabelCaps.copy(fontSize = 11.sp),
+                        color = SecondaryText
+                    )
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onEdit) {
                     Icon(
-                        imageVector = Icons.Default.FitnessCenter,
-                        contentDescription = null,
-                        tint = StravaOrange,
-                        modifier = Modifier.size(24.dp)
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = stringResource(R.string.edit_group),
+                        tint = OnSurfaceVariant
                     )
                 }
-                Spacer(Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = item.group.name,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = OnSurface
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.delete),
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f)
                     )
-                    Text(
-                        text = "${item.exerciseCount} exercises",
-                        style = LabelCaps,
-                        color = StravaOrange
-                    )
-                    item.lastPerformed?.let { ts ->
-                        val fmt = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
-                        Text(
-                            text = "Last: ${fmt.format(Date(ts))}",
-                            style = LabelCaps.copy(fontSize = 11.sp),
-                            color = SecondaryText
-                        )
-                    }
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onEdit) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(R.string.edit_group),
-                            tint = OnSurfaceVariant
-                        )
-                    }
-                    IconButton(onClick = onDelete) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(R.string.delete),
-                            tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f)
-                        )
-                    }
                 }
             }
         }

@@ -60,6 +60,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.overloadtracker.R
 import com.overloadtracker.ui.components.GlassCard
@@ -120,11 +121,13 @@ fun LiveWorkoutScreen(
                             Text(
                                 text = uiState.groupName.uppercase(),
                                 style = LabelCaps.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold),
-                                color = StravaOrange
+                                color = StravaOrange,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = formatDuration(uiState.elapsedMillis),
-                                style = HeadlineLargeMobile,
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                                 color = OnSurface
                             )
                         }
@@ -189,6 +192,12 @@ fun LiveWorkoutScreen(
                         },
                         onRepsChange = { setNum, value ->
                             viewModel.updateReps(exercise.exerciseId, setNum, value)
+                        },
+                        onTimeChange = { setNum, value ->
+                            viewModel.updateTime(exercise.exerciseId, setNum, value)
+                        },
+                        onCountChange = { setNum, value ->
+                            viewModel.updateCount(exercise.exerciseId, setNum, value)
                         },
                         onRpeChange = { setNum, rpe ->
                             viewModel.updateRpe(exercise.exerciseId, setNum, rpe)
@@ -294,6 +303,8 @@ private fun ExerciseSection(
     onToggleExpand: () -> Unit,
     onWeightChange: (Int, String) -> Unit,
     onRepsChange: (Int, String) -> Unit,
+    onTimeChange: (Int, String) -> Unit,
+    onCountChange: (Int, String) -> Unit,
     onRpeChange: (Int, Int?) -> Unit,
     onCompleteChange: (Int, Boolean) -> Unit,
     onAddSet: () -> Unit
@@ -330,6 +341,7 @@ private fun ExerciseSection(
                         color = OnSurface
                     )
                     exercise.prevBestLabel?.let { label ->
+                        Spacer(Modifier.height(2.dp))
                         Text(
                             text = "PREV BEST: $label",
                             style = LabelCaps.copy(fontSize = 10.sp),
@@ -337,12 +349,33 @@ private fun ExerciseSection(
                         )
                     }
                 }
-                IconButton(onClick = onToggleExpand) {
-                    Icon(
-                        imageVector = if (exercise.expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = null,
-                        tint = OnSurfaceVariant
-                    )
+                Spacer(Modifier.width(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    val completedCount = exercise.sets.count { it.isCompleted }
+                    val totalCount = exercise.sets.size
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(StravaOrange.copy(alpha = 0.15f))
+                            .border(1.dp, StravaOrange.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "$completedCount/$totalCount SETS",
+                            style = LabelCaps.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                            color = StravaOrange
+                        )
+                    }
+                    IconButton(onClick = onToggleExpand) {
+                        Icon(
+                            imageVector = if (exercise.expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = null,
+                            tint = OnSurfaceVariant
+                        )
+                    }
                 }
             }
 
@@ -360,9 +393,13 @@ private fun ExerciseSection(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text("SET", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.width(28.dp))
-                        Text("WEIGHT", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(1f))
-                        Text("REPS", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(0.9f))
-                        Text("RPE", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(0.7f))
+                        if (exercise.isCardio) {
+                            Text(stringResource(R.string.cardio_time_short).uppercase(), style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(1f))
+                            Text(stringResource(R.string.cardio_count).uppercase(), style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(1f))
+                        } else {
+                            Text("WEIGHT", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(1f))
+                            Text("REPS", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText, modifier = Modifier.weight(1f))
+                        }
                         Text("", modifier = Modifier.size(36.dp))
                     }
 
@@ -370,12 +407,17 @@ private fun ExerciseSection(
                     exercise.sets.forEach { set ->
                         SetRow(
                             setNumber = set.setNumber,
+                            isCardio = exercise.isCardio,
                             weightDisplay = set.weightDisplay,
                             repsDisplay = set.repsDisplay,
+                            timeDisplay = set.timeDisplay,
+                            countDisplay = set.countDisplay,
                             rpe = set.rpe,
                             isCompleted = set.isCompleted,
                             onWeightChange = { onWeightChange(set.setNumber, it) },
                             onRepsChange = { onRepsChange(set.setNumber, it) },
+                            onTimeChange = { onTimeChange(set.setNumber, it) },
+                            onCountChange = { onCountChange(set.setNumber, it) },
                             onRpeChange = { onRpeChange(set.setNumber, it) },
                             onCompletedChange = { onCompleteChange(set.setNumber, it) }
                         )
@@ -414,3 +456,4 @@ private fun ExerciseSection(
         }
     }
 }
+

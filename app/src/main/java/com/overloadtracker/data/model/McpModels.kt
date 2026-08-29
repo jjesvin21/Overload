@@ -37,9 +37,12 @@ data class McpSessionSetDto(
     val setNumber: Int,
     val weight: Double,
     val reps: Int,
+    val timeSeconds: Int? = null,
+    val count: Int? = null,
     val rpe: Int? = null,
     val restSeconds: Int? = null
 )
+
 
 @Serializable
 data class McpExerciseDto(

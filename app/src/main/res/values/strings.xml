@@ -63,4 +63,11 @@
     <string name="open">Open</string>
     <string name="loading">Loading exercises…</string>
     <string name="seeding">Preparing exercise library…</string>
+    <string name="time_min">Time (min)</string>
+    <string name="cardio_time_short">Time</string>
+    <string name="count_label">Count</string>
+    <string name="cardio_count">Count</string>
+    <string name="cardio_invalid_set">Enter time or count before completing a set.</string>
 </resources>
+
+

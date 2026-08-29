@@ -29,7 +29,7 @@ object CsvExporter {
     fun buildCsv(rows: List<CsvExportRow>): String {
         val sb = StringBuilder()
         sb.appendLine(
-            "date,workout_name,muscle_groups,exercise_name,equipment,set_number,weight_kg,reps,rpe,total_volume,notes"
+            "date,workout_name,muscle_groups,exercise_name,equipment,set_number,weight_kg,reps,time_seconds,count,rpe,total_volume,notes"
         )
         rows.forEach { r ->
             sb.append(escape(r.date)).append(',')
@@ -40,11 +40,14 @@ object CsvExporter {
                 .append(r.setNumber).append(',')
                 .append(r.weightKg).append(',')
                 .append(r.reps).append(',')
+                .append(r.timeSeconds?.toString().orEmpty()).append(',')
+                .append(r.count?.toString().orEmpty()).append(',')
                 .append(r.rpe?.toString().orEmpty()).append(',')
                 .append(r.totalVolume).append(',')
                 .append(escape(r.notes))
                 .appendLine()
         }
+
         return sb.toString()
     }
 

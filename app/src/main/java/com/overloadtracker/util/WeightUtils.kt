@@ -42,3 +42,42 @@ fun titleCase(value: String): String =
     value.split(" ").joinToString(" ") { part ->
         part.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
     }
+
+fun parseTimeDisplayToSeconds(display: String): Int? {
+    if (display.isBlank()) return null
+    if (display.contains(":")) {
+        val parts = display.split(":")
+        if (parts.size == 2) {
+            val m = parts[0].trim().toIntOrNull() ?: 0
+            val s = parts[1].trim().toIntOrNull() ?: 0
+            return m * 60 + s
+        }
+    }
+    val minutes = display.toDoubleOrNull() ?: return null
+    return (minutes * 60).toInt()
+}
+
+fun formatSecondsToDisplay(seconds: Int?): String {
+    if (seconds == null || seconds <= 0) return ""
+    val m = seconds / 60
+    val s = seconds % 60
+    return if (s == 0) m.toString() else String.format("%d:%02d", m, s)
+}
+
+fun formatCardioDisplay(timeSeconds: Int?, count: Int?): String {
+    val timePart = if (timeSeconds != null && timeSeconds > 0) {
+        val m = timeSeconds / 60
+        val s = timeSeconds % 60
+        if (s == 0) "${m}m" else "${m}m ${s}s"
+    } else null
+
+    val countPart = if (count != null && count > 0) "$count" else null
+
+    return when {
+        timePart != null && countPart != null -> "$timePart × $countPart"
+        timePart != null -> timePart
+        countPart != null -> "$countPart count"
+        else -> "0m"
+    }
+}
+
