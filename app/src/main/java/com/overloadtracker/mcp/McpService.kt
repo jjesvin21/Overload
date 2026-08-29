@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -32,14 +33,19 @@ class McpService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        startForeground(NOTIFICATION_ID, createNotification("Starting MCP Server..."))
+        startForegroundInternal("Starting MCP Server...")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action
         if (action == ACTION_STOP) {
             serverManager.stopServer()
-            stopForeground(STOP_FOREGROUND_REMOVE)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } else {
+                @Suppress("DEPRECATION")
+                stopForeground(true)
+            }
             stopSelf()
             return START_NOT_STICKY
         }
@@ -52,11 +58,15 @@ class McpService : Service() {
 
             serverManager.startServer(port = port, token = token, bindLocalOnly = bindLocalOnly)
 
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            manager.notify(
-                NOTIFICATION_ID,
-                createNotification("MCP Server running on http://$hostIp:$port")
-            )
+            try {
+                val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                manager.notify(
+                    NOTIFICATION_ID,
+                    createNotification("MCP Server running on http://$hostIp:$port")
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
         return START_STICKY
@@ -65,6 +75,23 @@ class McpService : Service() {
     override fun onDestroy() {
         serverManager.stopServer()
         super.onDestroy()
+    }
+
+    private fun startForegroundInternal(text: String) {
+        val notification = createNotification(text)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun createNotification(contentText: String): Notification {

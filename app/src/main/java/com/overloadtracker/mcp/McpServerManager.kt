@@ -283,7 +283,12 @@ class McpServerManager @Inject constructor(
                 }
             }
             serverEngine = engine
-            engine.start(wait = true)
+            try {
+                engine.start(wait = true)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                serverEngine = null
+            }
         }
     }
 
