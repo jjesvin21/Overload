@@ -42,7 +42,19 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         lifecycleScope.launch {
-            exerciseRepository.seedIfNeeded()
+            runCatching { exerciseRepository.seedIfNeeded() }
+        }
+
+        lifecycleScope.launch {
+            prefs.mcpEnabled.collect { enabled ->
+                if (enabled) {
+                    try {
+                        com.overloadtracker.mcp.McpService.startService(this@MainActivity)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
         }
 
         setContent {

@@ -69,12 +69,12 @@ class UserPreferencesRepository @Inject constructor(
 
     val mcpPort: Flow<Int> = context.dataStore.data.map { it[Keys.MCP_PORT] ?: 8080 }
 
-    val mcpBindLocalOnly: Flow<Boolean> = context.dataStore.data.map { it[Keys.MCP_BIND_LOCAL_ONLY] ?: true }
+    val mcpBindLocalOnly: Flow<Boolean> = context.dataStore.data.map { it[Keys.MCP_BIND_LOCAL_ONLY] ?: false }
 
     val mcpToken: Flow<String> = context.dataStore.data.map { prefs ->
         val current = prefs[Keys.MCP_TOKEN]
         if (current.isNullOrBlank() || current == "overload_mcp_secret_8080") {
-            generateSecureToken()
+            DEFAULT_MCP_TOKEN
         } else {
             current
         }
@@ -82,6 +82,10 @@ class UserPreferencesRepository @Inject constructor(
 
     private fun generateSecureToken(): String {
         return "ovld_" + java.util.UUID.randomUUID().toString().replace("-", "").take(24)
+    }
+
+    companion object {
+        const val DEFAULT_MCP_TOKEN = "ovld_20845f2053b046028f50b49f"
     }
 
     suspend fun setWeightUnit(unit: WeightUnit) {

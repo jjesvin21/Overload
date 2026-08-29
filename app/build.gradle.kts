@@ -32,6 +32,16 @@ android {
         }
     }
 
+    applicationVariants.all {
+        outputs.all {
+            (this as? com.android.build.gradle.api.ApkVariantOutput)?.let {
+                if (buildType.name == "release") {
+                    it.outputFileName = "overload.apk"
+                }
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -50,6 +60,19 @@ android {
     // Avoid aapt failing on large asset tree during debug if needed
     androidResources {
         noCompress += listOf("gif", "jpg", "json")
+    }
+}
+
+afterEvaluate {
+    tasks.named("assembleRelease").configure {
+        doLast {
+            val apkFile = layout.buildDirectory.file("outputs/apk/release/overload.apk").get().asFile
+            if (apkFile.exists()) {
+                val targetDir = layout.projectDirectory.dir("release").asFile
+                targetDir.mkdirs()
+                apkFile.copyTo(File(targetDir, apkFile.name), overwrite = true)
+            }
+        }
     }
 }
 

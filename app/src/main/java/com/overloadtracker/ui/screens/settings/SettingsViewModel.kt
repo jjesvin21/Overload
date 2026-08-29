@@ -104,10 +104,14 @@ private data class McpPrefsData(
     fun setMcpEnabled(context: Context, enabled: Boolean) {
         viewModelScope.launch {
             prefs.setMcpEnabled(enabled)
-            if (enabled) {
-                McpService.startService(context)
-            } else {
-                McpService.stopService(context)
+            try {
+                if (enabled) {
+                    McpService.startService(context)
+                } else {
+                    McpService.stopService(context)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
@@ -116,8 +120,12 @@ private data class McpPrefsData(
         viewModelScope.launch {
             prefs.setMcpBindLocalOnly(localOnly)
             if (uiState.value.mcpEnabled) {
-                McpService.stopService(context)
-                McpService.startService(context)
+                try {
+                    McpService.stopService(context)
+                    McpService.startService(context)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }
@@ -127,8 +135,12 @@ private data class McpPrefsData(
             mcpServerManager.revokeAllSessions()
             prefs.regenerateMcpToken()
             if (uiState.value.mcpEnabled) {
-                McpService.stopService(context)
-                McpService.startService(context)
+                try {
+                    McpService.stopService(context)
+                    McpService.startService(context)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }

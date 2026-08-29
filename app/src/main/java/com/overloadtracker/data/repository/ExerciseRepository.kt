@@ -12,6 +12,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,6 +24,8 @@ class ExerciseRepository @Inject constructor(
     private val prefs: UserPreferencesRepository,
     @ApplicationContext private val context: Context
 ) {
+    private val seedMutex = Mutex()
+
     fun observeFiltered(
         query: String,
         categories: Set<String>,
@@ -46,19 +50,22 @@ class ExerciseRepository @Inject constructor(
 
     /**
      * Seeds the database from assets when empty or when [force] is true.
+     * Thread-safe via [Mutex] to prevent concurrent DB lock / OOM crashes on app launch.
      *
      * @return number of exercises inserted.
      */
-    suspend fun seedIfNeeded(force: Boolean = false): Int = withContext(Dispatchers.IO) {
-        val count = exerciseDao.count()
-        val marked = prefs.isSeeded.first()
-        if (!force && count > 0 && marked) return@withContext count
-        if (force) exerciseDao.clearAll()
-        val exercises = JsonSeeder.loadExercisesFromAssets(context)
-        // Batch insert in chunks to keep memory stable
-        exercises.chunked(200).forEach { exerciseDao.insertAll(it) }
-        prefs.setSeeded(true)
-        exerciseDao.count()
+    suspend fun seedIfNeeded(force: Boolean = false): Int = seedMutex.withLock {
+        withContext(Dispatchers.IO) {
+            val count = exerciseDao.count()
+            val marked = prefs.isSeeded.first()
+            if (!force && count > 0 && marked) return@withContext count
+            if (force) exerciseDao.clearAll()
+            val exercises = JsonSeeder.loadExercisesFromAssets(context)
+            // Batch insert in chunks to keep memory stable
+            exercises.chunked(200).forEach { exerciseDao.insertAll(it) }
+            prefs.setSeeded(true)
+            exerciseDao.count()
+        }
     }
 
     suspend fun resetDatabase(): Int = seedIfNeeded(force = true)
