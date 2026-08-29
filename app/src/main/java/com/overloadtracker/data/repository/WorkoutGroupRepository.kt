@@ -61,4 +61,41 @@ class WorkoutGroupRepository @Inject constructor(
     }
 
     suspend fun getGroup(id: Long): WorkoutGroup? = groupDao.getGroupById(id)
+
+    suspend fun getAllGroupsWithExercisesSync(): List<Pair<WorkoutGroup, List<GroupExercise>>> {
+        val groups = groupDao.getAllGroupsSync()
+        return groups.map { group ->
+            val exercises = groupDao.getGroupExercisesSync(group.id)
+            Pair(group, exercises)
+        }
+    }
+
+    suspend fun replaceAllSplits(newSplits: List<NewSplitRequest>): List<Long> {
+        groupDao.deleteAllGroupExercises()
+        groupDao.deleteAllGroups()
+
+        val createdIds = mutableListOf<Long>()
+        for (split in newSplits) {
+            val groupId = groupDao.insertGroup(
+                WorkoutGroup(
+                    name = split.name.trim(),
+                    notes = split.notes?.trim()?.ifBlank { null }
+                )
+            )
+            val rows = split.exerciseIds.distinct().mapIndexed { index, exerciseId ->
+                GroupExercise(groupId = groupId, exerciseId = exerciseId, sortOrder = index)
+            }
+            if (rows.isNotEmpty()) {
+                groupDao.insertGroupExercises(rows)
+            }
+            createdIds.add(groupId)
+        }
+        return createdIds
+    }
 }
+
+data class NewSplitRequest(
+    val name: String,
+    val notes: String? = null,
+    val exerciseIds: List<String> = emptyList()
+)

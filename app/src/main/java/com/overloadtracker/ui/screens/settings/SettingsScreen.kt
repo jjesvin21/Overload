@@ -45,7 +45,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -74,6 +77,8 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
     val uiState by viewModel.uiState.collectAsState()
     var showClearDialog by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
@@ -180,6 +185,211 @@ fun SettingsScreen(
                         selected = uiState.themeMode == AppThemeMode.DARK,
                         onClick = { viewModel.setThemeMode(AppThemeMode.DARK) }
                     )
+                }
+            }
+
+            // Agentic MCP Integration Section
+            val context = androidx.compose.ui.platform.LocalContext.current
+            GlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text("AGENTIC MCP INTEGRATION", style = LabelCaps, color = StravaOrange)
+                            Text(
+                                text = if (uiState.mcpEnabled) "Server Active" else "Server Disabled",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (uiState.mcpEnabled) Color(0xFF4CAF50) else SecondaryText
+                            )
+                        }
+                        androidx.compose.material3.Switch(
+                            checked = uiState.mcpEnabled,
+                            onCheckedChange = { viewModel.setMcpEnabled(context, it) },
+                            colors = androidx.compose.material3.SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = StravaOrange
+                            )
+                        )
+                    }
+
+                    if (uiState.mcpEnabled) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(SurfaceContainerHighest, RoundedCornerShape(12.dp))
+                                .padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val isWifiMode = !uiState.mcpBindLocalOnly
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("CONNECT OVER WI-FI", style = LabelCaps.copy(fontSize = 10.sp), color = StravaOrange)
+                                    Text(
+                                        text = if (isWifiMode) "Enabled (LAN Subnet Access)" else "Disabled (USB ADB Cable Only)",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = OnSurface
+                                    )
+                                }
+                                androidx.compose.material3.Switch(
+                                    checked = isWifiMode,
+                                    onCheckedChange = { viewModel.setMcpBindLocalOnly(context, !it) },
+                                    colors = androidx.compose.material3.SwitchDefaults.colors(
+                                        checkedThumbColor = Color.White,
+                                        checkedTrackColor = StravaOrange
+                                    )
+                                )
+                            }
+
+                            if (isWifiMode) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color(0x22FF9800), RoundedCornerShape(8.dp))
+                                        .border(1.dp, Color(0xFFFF9800), RoundedCornerShape(8.dp))
+                                        .padding(10.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text("⚠️ ", fontSize = 14.sp)
+                                        Text(
+                                            text = "Port ${uiState.mcpPort} is exposed to all devices on this Wi-Fi network. Please turn this off after completing your AI analysis session.",
+                                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                            color = Color(0xFFFFCC80)
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(Modifier.height(2.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("Active Endpoint:", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText)
+                                    Text(
+                                        text = "http://${uiState.mcpIpAddress}:${uiState.mcpPort}",
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = OnSurface
+                                    )
+                                }
+                                TextButton(
+                                    onClick = {
+                                        clipboardManager.setText(AnnotatedString("http://${uiState.mcpIpAddress}:${uiState.mcpPort}"))
+                                        android.widget.Toast.makeText(context, "Endpoint copied", android.widget.Toast.LENGTH_SHORT).show()
+                                    },
+                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text("Copy", style = LabelCaps.copy(fontSize = 10.sp), color = StravaOrange)
+                                }
+                            }
+
+                            Spacer(Modifier.height(4.dp))
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text("Master Secret (Handshake Key):", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText)
+                                
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color(0x22000000), RoundedCornerShape(8.dp))
+                                        .border(1.dp, GlassBorder, RoundedCornerShape(8.dp))
+                                        .padding(start = 10.dp, end = 4.dp, top = 4.dp, bottom = 4.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = uiState.mcpToken,
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                fontFamily = FontFamily.Monospace
+                                            ),
+                                            color = StravaOrange,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        TextButton(
+                                            onClick = {
+                                                clipboardManager.setText(AnnotatedString(uiState.mcpToken))
+                                                android.widget.Toast.makeText(context, "Master Secret copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
+                                            },
+                                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                        ) {
+                                            Text("Copy Key", style = LabelCaps.copy(fontSize = 10.sp), color = StravaOrange)
+                                        }
+                                    }
+                                }
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    TextButton(
+                                        onClick = {
+                                            viewModel.revokeMcpSessions()
+                                            android.widget.Toast.makeText(context, "All active sessions revoked", android.widget.Toast.LENGTH_SHORT).show()
+                                        },
+                                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                    ) {
+                                        Text("Revoke Sessions", style = LabelCaps.copy(fontSize = 10.sp), color = OnSurfaceVariant)
+                                    }
+                                    Spacer(Modifier.width(4.dp))
+                                    TextButton(
+                                        onClick = {
+                                            viewModel.regenerateMcpToken(context)
+                                            android.widget.Toast.makeText(context, "New Master Secret generated", android.widget.Toast.LENGTH_SHORT).show()
+                                        },
+                                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                    ) {
+                                        Text("Roll Secret", style = LabelCaps.copy(fontSize = 10.sp), color = StravaOrange)
+                                    }
+                                }
+                            }
+
+                            Spacer(Modifier.height(2.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("USB Cable ADB Forward Command:", style = LabelCaps.copy(fontSize = 10.sp), color = SecondaryText)
+                                    Text(
+                                        text = "adb forward tcp:${uiState.mcpPort} tcp:${uiState.mcpPort}",
+                                        style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                                        color = OnSurfaceVariant
+                                    )
+                                }
+                                TextButton(
+                                    onClick = {
+                                        clipboardManager.setText(AnnotatedString("adb forward tcp:${uiState.mcpPort} tcp:${uiState.mcpPort}"))
+                                        android.widget.Toast.makeText(context, "ADB command copied", android.widget.Toast.LENGTH_SHORT).show()
+                                    },
+                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text("Copy", style = LabelCaps.copy(fontSize = 10.sp), color = OnSurfaceVariant)
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
