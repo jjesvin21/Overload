@@ -30,5 +30,8 @@ data class SessionSet(
     val reps: Int,
     val rpe: Int? = null,
     val isCompleted: Boolean = true,
-    val restSeconds: Int? = null
+    val restSeconds: Int? = null,
+    val timeSeconds: Int? = null,
+    val count: Int? = null
 )
+

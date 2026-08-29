@@ -5,7 +5,9 @@ package com.overloadtracker.data.model
 
 data class PreviousSetInfo(
     val weight: Double,
-    val reps: Int
+    val reps: Int,
+    val timeSeconds: Int? = null,
+    val count: Int? = null
 )
 
 data class ExerciseProgressPoint(
@@ -34,7 +36,10 @@ data class CsvExportRow(
     val setNumber: Int,
     val weightKg: Double,
     val reps: Int,
+    val timeSeconds: Int? = null,
+    val count: Int? = null,
     val rpe: Int?,
     val totalVolume: Double,
     val notes: String
 )
+

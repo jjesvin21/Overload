@@ -61,14 +61,19 @@ import com.overloadtracker.ui.theme.TrueBlack
 @Composable
 fun SetRow(
     setNumber: Int,
-    weightDisplay: String,
-    repsDisplay: String,
+    weightDisplay: String = "",
+    repsDisplay: String = "",
+    timeDisplay: String = "",
+    countDisplay: String = "",
     rpe: Int?,
     isCompleted: Boolean,
-    showRpe: Boolean = true,
-    onWeightChange: (String) -> Unit,
-    onRepsChange: (String) -> Unit,
-    onRpeChange: (Int?) -> Unit,
+    isCardio: Boolean = false,
+    showRpe: Boolean = false,
+    onWeightChange: (String) -> Unit = {},
+    onRepsChange: (String) -> Unit = {},
+    onTimeChange: (String) -> Unit = {},
+    onCountChange: (String) -> Unit = {},
+    onRpeChange: (Int?) -> Unit = {},
     onCompletedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -113,43 +118,83 @@ fun SetRow(
             }
         }
 
-        // Weight Input Field
-        OutlinedTextField(
-            value = weightDisplay,
-            onValueChange = onWeightChange,
-            placeholder = { Text(stringResource(R.string.weight), color = OnSurfaceVariant, fontSize = 12.sp) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = EtchedInputBackground,
-                unfocusedContainerColor = EtchedInputBackground,
-                focusedBorderColor = StravaOrange,
-                unfocusedBorderColor = GlassBorder,
-                focusedTextColor = OnSurface,
-                unfocusedTextColor = OnSurface
-            ),
-            modifier = Modifier.weight(1f)
-        )
+        if (isCardio) {
+            // Time Input Field (Minutes or m:s)
+            OutlinedTextField(
+                value = timeDisplay,
+                onValueChange = onTimeChange,
+                placeholder = { Text(stringResource(R.string.time_min), color = OnSurfaceVariant, fontSize = 12.sp) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = EtchedInputBackground,
+                    unfocusedContainerColor = EtchedInputBackground,
+                    focusedBorderColor = StravaOrange,
+                    unfocusedBorderColor = GlassBorder,
+                    focusedTextColor = OnSurface,
+                    unfocusedTextColor = OnSurface
+                ),
+                modifier = Modifier.weight(1f)
+            )
 
-        // Reps Input Field
-        OutlinedTextField(
-            value = repsDisplay,
-            onValueChange = onRepsChange,
-            placeholder = { Text(stringResource(R.string.reps), color = OnSurfaceVariant, fontSize = 12.sp) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = EtchedInputBackground,
-                unfocusedContainerColor = EtchedInputBackground,
-                focusedBorderColor = StravaOrange,
-                unfocusedBorderColor = GlassBorder,
-                focusedTextColor = OnSurface,
-                unfocusedTextColor = OnSurface
-            ),
-            modifier = Modifier.weight(0.9f)
-        )
+            // Count Input Field
+            OutlinedTextField(
+                value = countDisplay,
+                onValueChange = onCountChange,
+                placeholder = { Text(stringResource(R.string.count_label), color = OnSurfaceVariant, fontSize = 12.sp) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = EtchedInputBackground,
+                    unfocusedContainerColor = EtchedInputBackground,
+                    focusedBorderColor = StravaOrange,
+                    unfocusedBorderColor = GlassBorder,
+                    focusedTextColor = OnSurface,
+                    unfocusedTextColor = OnSurface
+                ),
+                modifier = Modifier.weight(1f)
+            )
+        } else {
+            // Weight Input Field
+            OutlinedTextField(
+                value = weightDisplay,
+                onValueChange = onWeightChange,
+                placeholder = { Text(stringResource(R.string.weight), color = OnSurfaceVariant, fontSize = 12.sp) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = EtchedInputBackground,
+                    unfocusedContainerColor = EtchedInputBackground,
+                    focusedBorderColor = StravaOrange,
+                    unfocusedBorderColor = GlassBorder,
+                    focusedTextColor = OnSurface,
+                    unfocusedTextColor = OnSurface
+                ),
+                modifier = Modifier.weight(1f)
+            )
+
+            // Reps Input Field
+            OutlinedTextField(
+                value = repsDisplay,
+                onValueChange = onRepsChange,
+                placeholder = { Text(stringResource(R.string.reps), color = OnSurfaceVariant, fontSize = 12.sp) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = EtchedInputBackground,
+                    unfocusedContainerColor = EtchedInputBackground,
+                    focusedBorderColor = StravaOrange,
+                    unfocusedBorderColor = GlassBorder,
+                    focusedTextColor = OnSurface,
+                    unfocusedTextColor = OnSurface
+                ),
+                modifier = Modifier.weight(1f)
+            )
+        }
 
         if (showRpe) {
             RpeDropdown(
@@ -185,6 +230,7 @@ fun SetRow(
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
